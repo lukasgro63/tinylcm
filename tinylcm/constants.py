@@ -1,0 +1,51 @@
+"""Constants for the tinylcm library."""
+
+# Version
+VERSION = "0.1.0"
+
+# Model formats
+MODEL_FORMAT_TFLITE = "tflite"
+MODEL_FORMAT_ONNX = "onnx"
+MODEL_FORMAT_PYTORCH = "pytorch"
+MODEL_FORMAT_PICKLE = "pkl"
+
+# Status values
+STATUS_RUNNING = "RUNNING"
+STATUS_COMPLETED = "COMPLETED"
+STATUS_FAILED = "FAILED"
+STATUS_ABORTED = "ABORTED"
+
+# Data types
+DATA_TYPE_IMAGE = "image"
+DATA_TYPE_TEXT = "text"
+DATA_TYPE_SENSOR = "sensor"
+DATA_TYPE_JSON = "json"
+
+# File formats
+FILE_FORMAT_JSON = "json"
+FILE_FORMAT_CSV = "csv"
+FILE_FORMAT_TXT = "txt"
+FILE_FORMAT_PNG = "png"
+FILE_FORMAT_JPG = "jpg"
+FILE_FORMAT_JPEG = "jpeg"
+
+# Default file paths
+DEFAULT_BASE_DIR = "tinylcm_data"
+DEFAULT_MODELS_DIR = f"{DEFAULT_BASE_DIR}/models"
+DEFAULT_TRAINING_DIR = f"{DEFAULT_BASE_DIR}/training_runs"
+DEFAULT_INFERENCE_DIR = f"{DEFAULT_BASE_DIR}/inference_logs"
+DEFAULT_DRIFT_DIR = f"{DEFAULT_BASE_DIR}/drift_detector"
+DEFAULT_DATA_DIR = f"{DEFAULT_BASE_DIR}/data_logs"
+DEFAULT_SYNC_DIR = f"{DEFAULT_BASE_DIR}/sync"
+DEFAULT_LOG_DIR = f"{DEFAULT_BASE_DIR}/logs"
+
+# Default file names
+DEFAULT_LOG_FILE = f"{DEFAULT_LOG_DIR}/tinylcm.log"
+DEFAULT_CONFIG_FILE = "tinylcm_config.json"
+DEFAULT_ACTIVE_MODEL_LINK = "active_model"
+
+# Default buffer sizes and limits
+DEFAULT_MAX_STORAGE = 1024 * 1024 * 1024  # 1GB
+DEFAULT_MEMORY_ENTRIES = 1000
+DEFAULT_LOG_INTERVAL = 100
+DEFAULT_BUFFER_SIZE = 50
