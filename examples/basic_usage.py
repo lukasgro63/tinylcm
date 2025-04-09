@@ -80,6 +80,50 @@ def anomaly_callback(record: Dict[str, Any]) -> None:
     print("*************************\n")
 
 
+def prepare_workspace(work_dir: Path) -> None:
+    """
+    Prepare a clean workspace for the example.
+    
+    Args:
+        work_dir: Path to the workspace directory
+    """
+    # Import shutil to handle directory operations
+    import shutil
+    
+    # Create main directory if it doesn't exist
+    os.makedirs(work_dir, exist_ok=True)
+    
+    # Create subdirectories
+    subdirs = ["models", "inference", "data"]
+    for subdir in subdirs:
+        subdir_path = work_dir / subdir
+        
+        # Clean up if it exists already
+        if subdir_path.exists():
+            # Handle symlinks first
+            active_link = subdir_path / "active_model"
+            if active_link.exists():
+                if active_link.is_symlink():
+                    os.unlink(active_link)
+                elif active_link.is_file():
+                    os.remove(active_link)
+            
+            # Clean out files but don't remove directory structure
+            for item in subdir_path.iterdir():
+                try:
+                    if item.is_dir():
+                        shutil.rmtree(item)
+                    else:
+                        os.remove(item)
+                except Exception as e:
+                    print(f"Warning: Could not remove {item}: {e}")
+        else:
+            # Create if it doesn't exist
+            os.makedirs(subdir_path, exist_ok=True)
+    
+    print(f"Prepared workspace at {work_dir}")
+
+
 def main() -> None:
     """Run the basic example."""
     print("TinyLCM Basic Example")
@@ -88,7 +132,7 @@ def main() -> None:
     
     # Create a working directory for the example
     work_dir = Path("tinylcm_example")
-    os.makedirs(work_dir, exist_ok=True)
+    prepare_workspace(work_dir)
     
     # Create and initialize components
     model_manager = ModelManager(storage_dir=work_dir / "models")
@@ -114,7 +158,8 @@ def main() -> None:
     )
     
     print(f"\nSaved model with ID: {model_id}")
-    print(f"Model is now active: {model_manager.get_model_metadata(model_id)['is_active']}")
+    model_metadata = model_manager.get_model_metadata(model_id)
+    print(f"Model is now active: {model_metadata['is_active']}")
     
     # Load the model for inference
     try:
@@ -124,10 +169,22 @@ def main() -> None:
         
         print(f"\nLoaded model: {model['name']} v{model['version']}")
         print(f"Model classes: {', '.join(model['classes'])}")
+    except Exception as e:
+        print(f"\nError loading active model: {e}")
+        print("Falling back to loading model by ID...")
         
-        # Simulate inference loop
-        print("\nRunning inference simulation...")
+        # Alternative approach: use the model ID directly
+        model_path = model_manager.load_model(model_id)
+        with open(model_path, "r") as f:
+            model = json.load(f)
         
+        print(f"Loaded model by ID: {model['name']} v{model['version']}")
+        print(f"Model classes: {', '.join(model['classes'])}")
+    
+    # Simulate inference loop
+    print("\nRunning inference simulation...")
+    
+    try:
         for i in range(20):
             # Generate a unique input ID
             input_id = f"img_{i:04d}"
@@ -171,7 +228,7 @@ def main() -> None:
             print(f"  [{i+1}/20] Processed {input_id}: {prediction} (confidence: {confidence:.4f}, latency: {latency_ms:.2f}ms)")
             
             # Slow down the example for readability
-            time.sleep(0.2)
+            time.sleep(0.1)
         
         # Get and print metrics
         metrics = inference_monitor.get_current_metrics()
@@ -209,23 +266,14 @@ def main() -> None:
             print(f"  {model_meta['model_id']}: {model_meta.get('description', 'No description')} ({model_meta.get('version', 'unknown')})")
         
     except Exception as e:
-        print(f"\nError during model operations: {str(e)}")
-        print("This could be due to symlink limitations on your system.")
-        print("Let's reload the model by ID instead:")
-        
-        # Alternative approach: use the model ID directly
-        model_path = model_manager.load_model(model_id)
-        with open(model_path, "r") as f:
-            model = json.load(f)
-        
-        print(f"\nReloaded model by ID: {model['name']} v{model['version']}")
-    
-    # Clean up resources
-    inference_monitor.close()
-    data_logger.close()
+        print(f"\nError during simulation: {e}")
+    finally:
+        # Always clean up resources
+        print("\nCleaning up resources...")
+        inference_monitor.close()
+        data_logger.close()
     
     print("\nExample completed successfully.")
-
 
 if __name__ == "__main__":
     main()

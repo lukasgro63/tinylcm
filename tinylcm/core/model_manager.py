@@ -463,32 +463,60 @@ class ModelManager:
         
         return model_id
     
+
     def load_model(self, model_id: Optional[str] = None) -> str:
-        """
-        Load a model from storage.
-        
-        Args:
-            model_id: Unique identifier for the model (default: active model)
+            """
+            Load a model from storage.
             
-        Returns:
-            str: Path to the model file
+            Args:
+                model_id: Unique identifier for the model (default: active model)
+                
+            Returns:
+                str: Path to the model file
+                
+            Raises:
+                ValueError: If model not found
+            """
+            # If no model_id provided, use active model
+            if model_id is None:
+                active_link = Path(self.storage_dir) / DEFAULT_ACTIVE_MODEL_LINK
+                
+                if not active_link.exists():
+                    raise ValueError("No active model set")
+                
+                # Handle both symlink and fallback text file approaches
+                if active_link.is_symlink():
+                    # Get the target of the symlink
+                    target = os.readlink(active_link)
+                    if os.path.isabs(target):
+                        model_dir = Path(target)
+                    else:
+                        # If relative, resolve against the parent of the symlink
+                        model_dir = (active_link.parent / target).resolve()
+                    
+                    # Extract the model_id from the path
+                    model_id = model_dir.name
+                else:
+                    # Read model_id from fallback text file
+                    try:
+                        with open(active_link, "r") as f:
+                            model_id = f.read().strip()
+                    except Exception as e:
+                        raise ValueError(f"Failed to read active model reference: {str(e)}")
             
-        Raises:
-            ValueError: If model not found
-        """
-        # If no model_id provided, use active model
-        if model_id is None:
-            active_link = Path(self.storage_dir) / DEFAULT_ACTIVE_MODEL_LINK
+            # Validate model exists
+            model_dir = Path(self.models_dir) / model_id
+            if not model_dir.exists():
+                raise ValueError(f"Model not found: {model_id}")
+                
+            # Find model files
+            model_files = list(model_dir.glob("*"))
+            if not model_files:
+                raise ValueError(f"No model files found in directory: {model_dir}")
             
-            if not active_link.exists() or not active_link.is_symlink():
-                raise ValueError("No active model set")
-            
-            model_id = os.path.basename(os.readlink(active_link))
-        
-        return self.storage_strategy.load_model(
-            model_id=model_id,
-            models_dir=self.models_dir
-        )
+            # Return the path to the first model file
+            return str(model_files[0])
+
     
     def get_model_metadata(self, model_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -551,54 +579,72 @@ class ModelManager:
             metadata_dir=self.metadata_dir,
             filter_func=filter_func
         )
-    
+
     def set_active_model(self, model_id: str) -> bool:
-        """
-        Set a model as the active model.
-        
-        Args:
-            model_id: Unique identifier for the model
+            """
+            Set a model as the active model.
             
-        Returns:
-            bool: True if successful
+            Args:
+                model_id: Unique identifier for the model
+                
+            Returns:
+                bool: True if successful
+                
+            Raises:
+                ValueError: If model not found
+            """
+            # Check if model exists
+            model_dir = Path(self.models_dir) / model_id
             
-        Raises:
-            ValueError: If model not found
-        """
-        # Check if model exists
-        model_dir = Path(self.models_dir) / model_id
-        
-        if not model_dir.exists():
-            raise ValueError(f"Model not found: {model_id}")
-        
-        # Update metadata for all models
-        all_models = self.list_models()
-        
-        for metadata in all_models:
-            current_id = metadata["model_id"]
-            metadata["is_active"] = (current_id == model_id)
+            if not model_dir.exists():
+                raise ValueError(f"Model not found: {model_id}")
             
-            # Save updated metadata
-            self.metadata_provider.save_metadata(
-                model_id=current_id,
-                metadata=metadata,
-                metadata_dir=self.metadata_dir
-            )
-        
-        # Create/update symbolic link
-        active_link = Path(self.storage_dir) / DEFAULT_ACTIVE_MODEL_LINK
-        
-        # Remove existing link if any
-        if active_link.exists():
-            if active_link.is_symlink():
-                active_link.unlink()
-            else:
-                raise ValueError(f"Active model path exists but is not a symlink: {active_link}")
-        
-        # Create new link
-        os.symlink(model_dir, active_link, target_is_directory=True)
-        
-        return True
+            # Update metadata for all models
+            all_models = self.list_models()
+            
+            for metadata in all_models:
+                current_id = metadata["model_id"]
+                metadata["is_active"] = (current_id == model_id)
+                
+                # Save updated metadata
+                self.metadata_provider.save_metadata(
+                    model_id=current_id,
+                    metadata=metadata,
+                    metadata_dir=self.metadata_dir
+                )
+            
+            # Create/update symbolic link
+            active_link = Path(self.storage_dir) / DEFAULT_ACTIVE_MODEL_LINK
+            
+            # Thoroughly clean up any existing link or file
+            try:
+                if active_link.exists():
+                    if active_link.is_symlink():
+                        os.unlink(active_link)
+                    elif active_link.is_file():
+                        os.remove(active_link)
+                    elif active_link.is_dir():
+                        shutil.rmtree(active_link)
+            except Exception as e:
+                print(f"Warning: Could not remove existing link/file at {active_link}: {e}")
+                # Continue anyway - we'll try to create the link
+            
+            # For environments where symlinks might be problematic (Windows, Docker),
+            # we'll use a fallback mechanism - create a text file with the model ID
+            try:
+                # Try to create a symlink first
+                os.symlink(str(model_dir), str(active_link), target_is_directory=True)
+            except (OSError, AttributeError) as e:
+                # If symlink creation fails, create a text file with the model ID instead
+                print(f"Warning: Could not create symlink, using fallback mechanism: {e}")
+                try:
+                    with open(active_link, "w") as f:
+                        f.write(model_id)
+                    return True
+                except Exception as fallback_error:
+                    raise ValueError(f"Failed to create active model reference: {str(fallback_error)}")
+            
+            return True
     
     def delete_model(self, model_id: str, force: bool = False) -> bool:
         """
