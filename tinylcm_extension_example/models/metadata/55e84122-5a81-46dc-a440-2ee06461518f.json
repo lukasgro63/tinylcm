@@ -1,0 +1,12 @@
+{
+  "description": "Advanced fruit classifier",
+  "filename": "advanced_model.json",
+  "is_active": false,
+  "md5_hash": "2f10f3a5210af758e8e3a9ac798c3108",
+  "metrics": {},
+  "model_format": "json",
+  "model_id": "55e84122-5a81-46dc-a440-2ee06461518f",
+  "tags": [],
+  "timestamp": 1744201250.4096394,
+  "version": "v2"
+}

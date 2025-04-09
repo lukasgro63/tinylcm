@@ -1,0 +1,18 @@
+{
+  "description": "Mock image classifier",
+  "filename": "mock_model.json",
+  "is_active": true,
+  "md5_hash": "ee22511ec0c242b12da45d453ae61a54",
+  "metrics": {
+    "accuracy": 0.85,
+    "f1": 0.84
+  },
+  "model_format": "json",
+  "model_id": "a3c4c018-4179-4906-91d0-917b15d1032e",
+  "tags": [
+    "example",
+    "mock"
+  ],
+  "timestamp": 1744201589.5997195,
+  "version": "v1"
+}
