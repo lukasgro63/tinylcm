@@ -6,7 +6,7 @@ including version information, data types, file formats, and default
 configuration values.
 """
 
-from enum import Enum, auto
+from enum import Enum
 from typing import Dict, Any, Final
 
 # Version

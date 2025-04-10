@@ -22,13 +22,13 @@ def mock_model_file(temp_dir):
     """Create a mock model file for testing."""
     model_dir = os.path.join(temp_dir, "models")
     os.makedirs(model_dir, exist_ok=True)
-    
+
     model_path = os.path.join(model_dir, "test_model.json")
     model_content = {"weights": [1.0, 2.0, 3.0], "layers": [10, 5, 1]}
-    
-    with open(model_path, "w") as f:
+
+    with open(model_path, "w", encoding="utf-8") as f:
         json.dump(model_content, f)
-    
+
     return model_path
 
 
