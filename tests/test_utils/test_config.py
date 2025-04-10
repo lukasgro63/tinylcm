@@ -28,7 +28,7 @@ class TestConfig:
         # Check a few default values
         assert config.get("storage", "base_dir") == "tinylcm_data"
         assert config.get("model_manager", "storage_dir") == "tinylcm_data/models"
-        assert "training_tracker" in config.get("training_tracker")
+        assert "log_artifacts" in config.get("training_tracker")
 
     def test_config_get(self):
         """Test Config.get method."""
