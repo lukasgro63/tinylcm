@@ -1,0 +1,232 @@
+[
+  {
+    "confidence": 0.8662957884408731,
+    "ground_truth": "cat",
+    "input_id": "img_0000",
+    "latency_ms": 21.055936813354492,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268011.6783798
+  },
+  {
+    "confidence": 0.8679544816172645,
+    "ground_truth": "bird",
+    "input_id": "img_0001",
+    "latency_ms": 46.45848274230957,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268011.827155
+  },
+  {
+    "confidence": 0.7569733743402243,
+    "ground_truth": "dog",
+    "input_id": "img_0002",
+    "latency_ms": 18.610715866088867,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268011.9492135
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: bird != cat"
+    ],
+    "confidence": 0.7679047597854463,
+    "ground_truth": "cat",
+    "input_id": "img_0003",
+    "latency_ms": 31.338930130004883,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.0845926
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: dog != cat"
+    ],
+    "confidence": 0.8149871163933231,
+    "ground_truth": "cat",
+    "input_id": "img_0004",
+    "latency_ms": 25.548934936523438,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.2202616
+  },
+  {
+    "confidence": 0.9825041275863069,
+    "ground_truth": "cat",
+    "input_id": "img_0005",
+    "latency_ms": 35.89487075805664,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.3587666
+  },
+  {
+    "confidence": 0.7394688638038075,
+    "ground_truth": "cat",
+    "input_id": "img_0006",
+    "latency_ms": 16.30091667175293,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.4771903
+  },
+  {
+    "confidence": 0.9668040878079005,
+    "ground_truth": "bird",
+    "input_id": "img_0007",
+    "latency_ms": 51.366329193115234,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.6314342
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: dog != bird"
+    ],
+    "confidence": 0.9238692580553994,
+    "ground_truth": "bird",
+    "input_id": "img_0008",
+    "latency_ms": 25.603771209716797,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.763036
+  },
+  {
+    "confidence": 0.7163881132981866,
+    "ground_truth": "bird",
+    "input_id": "img_0009",
+    "latency_ms": 35.82000732421875,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268012.9047108
+  },
+  {
+    "confidence": 0.8751227671436006,
+    "ground_truth": "dog",
+    "input_id": "img_0010",
+    "latency_ms": 38.237571716308594,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.048256
+  },
+  {
+    "confidence": 0.7023353745001933,
+    "ground_truth": "dog",
+    "input_id": "img_0011",
+    "latency_ms": 25.694847106933594,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.1795151
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: dog != cat"
+    ],
+    "confidence": 0.9098845142966364,
+    "ground_truth": "cat",
+    "input_id": "img_0012",
+    "latency_ms": 22.309064865112305,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.314306
+  },
+  {
+    "confidence": 0.7627318447523824,
+    "ground_truth": "dog",
+    "input_id": "img_0013",
+    "latency_ms": 19.751548767089844,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.440469
+  },
+  {
+    "confidence": 0.8905360530888228,
+    "ground_truth": "bird",
+    "input_id": "img_0014",
+    "latency_ms": 18.195152282714844,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.5633762
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Low confidence: 0.2000 < 0.3000",
+      "Statistically low confidence: 0.2000, z-score: -3.39 < -2.00"
+    ],
+    "confidence": 0.2,
+    "ground_truth": "bird",
+    "input_id": "img_0015",
+    "latency_ms": 16.932249069213867,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.685282
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: cat != dog"
+    ],
+    "confidence": 0.9668281414109839,
+    "ground_truth": "dog",
+    "input_id": "img_0016",
+    "latency_ms": 34.07597541809082,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.8259401
+  },
+  {
+    "confidence": 0.969491155183807,
+    "ground_truth": "bird",
+    "input_id": "img_0017",
+    "latency_ms": 34.35039520263672,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268013.965497
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "High latency: 200.00ms > 100.00ms",
+      "Statistically high latency: 200.00ms, z-score: 4.11 > 2.00"
+    ],
+    "confidence": 0.7973072672897069,
+    "ground_truth": "cat",
+    "input_id": "img_0018",
+    "latency_ms": 200,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268014.0891113
+  },
+  {
+    "confidence": 0.8803424605563855,
+    "ground_truth": "bird",
+    "input_id": "img_0019",
+    "latency_ms": 48.60401153564453,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "dc6529b4-eb6e-442c-94cd-96045e58ce88",
+    "timestamp": 1744268014.2432306
+  }
+]
