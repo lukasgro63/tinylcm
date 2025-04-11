@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from tinylcm.core.model_manager import ModelManager
+from tinylcm.utils.errors import ModelNotFoundError
 
 
 class TestModelManager:
@@ -142,7 +143,7 @@ class TestModelManager:
 
     def test_load_model_nonexistent(self):
         """Test loading a nonexistent model."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ModelNotFoundError):
             self.model_manager.load_model("nonexistent_model")
 
     def test_get_model_metadata(self):

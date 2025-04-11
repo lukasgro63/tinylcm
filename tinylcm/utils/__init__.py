@@ -7,6 +7,7 @@ This module provides various utility functionalities:
 - metrics: Metrics calculation and statistics utilities
 - versioning: Version management and comparison utilities
 - logging: Logging utilities
+- errors: Custom exception types
 """
 
 from tinylcm.utils.config import Config, get_config, set_global_config, load_config
@@ -32,6 +33,15 @@ from tinylcm.utils.versioning import (
     get_version_diff
 )
 from tinylcm.utils.logging import setup_logger
+from tinylcm.utils.errors import (
+    TinyLCMError,
+    ModelError, ModelNotFoundError, ModelIntegrityError,
+    StorageError, StorageAccessError, StorageWriteError,
+    ConfigError,
+    DataLoggerError,
+    MonitoringError,
+    InvalidInputError
+)
 
 __all__ = [
     # Configuration
@@ -62,5 +72,14 @@ __all__ = [
     "get_version_diff",
     
     # Logging utilities
-    "setup_logger"
+    "setup_logger",
+    
+    # Error classes
+    "TinyLCMError",
+    "ModelError", "ModelNotFoundError", "ModelIntegrityError",
+    "StorageError", "StorageAccessError", "StorageWriteError",
+    "ConfigError",
+    "DataLoggerError",
+    "MonitoringError",
+    "InvalidInputError",
 ]
