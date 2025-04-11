@@ -8,7 +8,7 @@ This module provides the main functional components of TinyLCM:
 """
 
 from tinylcm.core.model_manager import ModelManager
-from tinylcm.core.inference_monitor import InferenceMonitor
+from tinylcm.core.monitoring.inference_monitor import InferenceMonitor
 from tinylcm.core.data_logger import DataLogger
 
 __all__ = [
