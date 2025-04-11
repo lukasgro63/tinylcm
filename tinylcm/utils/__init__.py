@@ -6,6 +6,7 @@ This module provides various utility functionalities:
 - file_utils: File operations helpers
 - metrics: Metrics calculation and statistics utilities
 - versioning: Version management and comparison utilities
+- logging: Logging utilities
 """
 
 from tinylcm.utils.config import Config, get_config, set_global_config, load_config
@@ -30,6 +31,7 @@ from tinylcm.utils.versioning import (
     compare_versions,
     get_version_diff
 )
+from tinylcm.utils.logging import setup_logger
 
 __all__ = [
     # Configuration
@@ -57,5 +59,8 @@ __all__ = [
     "calculate_content_hash",
     "create_version_info",
     "compare_versions",
-    "get_version_diff"
+    "get_version_diff",
+    
+    # Logging utilities
+    "setup_logger"
 ]

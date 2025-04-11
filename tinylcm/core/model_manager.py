@@ -17,6 +17,7 @@ from tinylcm.constants import DEFAULT_ACTIVE_MODEL_LINK, DEFAULT_MODELS_DIR
 from tinylcm.utils.config import Config, get_config
 from tinylcm.utils.file_utils import ensure_dir, load_json, save_json
 from tinylcm.utils.versioning import calculate_file_hash
+from tinylcm.utils.logging import setup_logger
 
 
 class ModelFormat(str, Enum):
@@ -336,7 +337,7 @@ class JSONFileMetadataProvider(ModelMetadataProvider):
                     metadata_list.append(metadata)
             except Exception as e:
                 # Log but continue
-                print(f"Error loading metadata from {metadata_file}: {str(e)}")
+                self.logger.error(f"Error loading metadata from {metadata_file}: {str(e)}")
 
         return metadata_list
 
@@ -388,6 +389,9 @@ class ModelManager:
             config: Configuration (default: global config)
         """
         self.config = config or get_config()
+        
+        # Logger initialisieren
+        self.logger = setup_logger(f"{__name__}.{self.__class__.__name__}")
 
         # Get storage directory from arguments or config
         self.storage_dir = Path(storage_dir or self.config.get("model_manager", "storage_dir", DEFAULT_MODELS_DIR))
@@ -625,7 +629,7 @@ class ModelManager:
                     elif active_link.is_dir():
                         shutil.rmtree(active_link)
             except Exception as e:
-                print(f"Warning: Could not remove existing link/file at {active_link}: {e}")
+                self.logger.warning(f"Could not remove existing link/file at {active_link}: {e}")
                 # Continue anyway - we'll try to create the link
 
             # For environments where symlinks might be problematic (Windows, Docker),
@@ -635,7 +639,7 @@ class ModelManager:
                 os.symlink(str(model_dir), str(active_link), target_is_directory=True)
             except (OSError, AttributeError) as e:
                 # If symlink creation fails, create a text file with the model ID instead
-                print(f"Warning: Could not create symlink, using fallback mechanism: {e}")
+                self.logger.warning(f"Could not create symlink, using fallback mechanism: {e}")
                 try:
                     with open(active_link, "w", encoding='utf-8') as f:
                         f.write(model_id)
@@ -742,7 +746,7 @@ class ModelManager:
             return True
 
         except Exception as e:
-            print(f"Error adding tag to model {model_id}: {str(e)}")
+            self.logger.error(f"Error adding tag to model {model_id}: {str(e)}")
             return False
 
     def remove_tag(self, model_id: str, tag: str) -> bool:
@@ -772,7 +776,7 @@ class ModelManager:
             return True
 
         except Exception as e:
-            print(f"Error removing tag from model {model_id}: {str(e)}")
+            self.logger.error(f"Error removing tag from model {model_id}: {str(e)}")
             return False
 
     def update_metrics(self, model_id: str, metrics: Dict[str, float]) -> bool:
@@ -805,7 +809,7 @@ class ModelManager:
             return True
 
         except Exception as e:
-            print(f"Error updating metrics for model {model_id}: {str(e)}")
+            self.logger.error(f"Error updating metrics for model {model_id}: {str(e)}")
             return False
 
     def verify_model_integrity(self, model_id: str) -> bool:
@@ -836,5 +840,5 @@ class ModelManager:
             return current_hash == stored_hash
 
         except Exception as e:
-            print(f"Error verifying model integrity for {model_id}: {str(e)}")
+            self.logger.error(f"Error verifying model integrity for {model_id}: {str(e)}")
             return False
