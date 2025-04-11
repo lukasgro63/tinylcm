@@ -1,0 +1,13 @@
+{
+  "confidence": 0.8810843379715237,
+  "entry_id": "9d96840d-f6c5-403c-9f2a-5e1d0acf16ea",
+  "filename": "images/9d96840d-f6c5-403c-9f2a-5e1d0acf16ea.jpg",
+  "input_type": "image",
+  "metadata": {
+    "sequence": 13,
+    "source": "camera_1"
+  },
+  "prediction": "bird",
+  "session_id": "50d809fe-d5e2-4f7a-887c-86e303d6e9e1",
+  "timestamp": 1744368592.1280844
+}

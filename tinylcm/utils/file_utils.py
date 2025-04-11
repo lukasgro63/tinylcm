@@ -10,6 +10,7 @@ import os
 import shutil # Import shutil for rmtree
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, TypeVar, Protocol, overload
+from typing import Generator, Iterable  # For streaming operations
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -251,3 +252,133 @@ def safe_remove(path: PathLike) -> bool:
     except Exception as e: # Catch unexpected errors during removal
          logger.error(f"Unexpected error removing {path_obj}: {e}", exc_info=True)
          return False
+
+
+def stream_read(
+    file_path: PathLike,
+    chunk_size: int = 1024,
+    mode: str = 'r'
+) -> Generator[str, None, None]:
+    """
+    Read a file in chunks.
+    
+    Args:
+        file_path: Path to the file
+        chunk_size: Size of chunks to read in bytes
+        mode: File mode ('r' for text, 'rb' for binary)
+        
+    Yields:
+        Chunks of file content
+        
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+    """
+    path_obj = Path(file_path)
+    if not path_obj.is_file():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    encoding = 'utf-8' if 'b' not in mode else None
+    try:
+        with path_obj.open(mode=mode, encoding=encoding) as f:
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                yield chunk
+    except Exception as e:
+        logger.error(f"Error reading file {path_obj}: {e}")
+        raise
+
+
+def stream_write(
+    data_generator: Iterable[Any],
+    file_path: PathLike,
+    mode: str = 'w'
+) -> None:
+    """
+    Write data from a generator/iterable to a file.
+    
+    Args:
+        data_generator: Generator or iterable providing data
+        file_path: Path to the target file
+        mode: File mode ('w' for text, 'wb' for binary)
+        
+    Raises:
+        StorageWriteError: If there are issues writing to the file
+    """
+    path_obj = Path(file_path)
+    
+    # Ensure parent directory exists
+    ensure_dir(path_obj.parent)
+    
+    encoding = 'utf-8' if 'b' not in mode else None
+    try:
+        with path_obj.open(mode=mode, encoding=encoding) as f:
+            for chunk in data_generator:
+                f.write(chunk)
+    except Exception as e:
+        logger.error(f"Error writing to file {path_obj}: {e}")
+        from tinylcm.utils.errors import StorageWriteError
+        raise StorageWriteError(f"Failed to write to {file_path}: {e}")
+
+
+def stream_read_jsonl(file_path: PathLike) -> Generator[Dict[str, Any], None, None]:
+    """
+    Read a JSONL file (JSON Lines) line by line.
+    
+    Args:
+        file_path: Path to the JSONL file
+        
+    Yields:
+        Dict: Deserialized JSON objects per line
+        
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        json.JSONDecodeError: For invalid JSON
+    """
+    path_obj = Path(file_path)
+    if not path_obj.is_file():
+        raise FileNotFoundError(f"JSONL file not found: {file_path}")
+    
+    try:
+        with path_obj.open('r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line:  # Skip empty lines
+                    yield json.loads(line)
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON in file {path_obj}: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Error reading JSONL file {path_obj}: {e}")
+        raise
+
+
+def stream_write_jsonl(
+    data_generator: Iterable[Dict[str, Any]],
+    file_path: PathLike
+) -> None:
+    """
+    Write a generator of dictionaries as a JSONL file.
+    
+    Args:
+        data_generator: Generator or iterable of dictionaries
+        file_path: Path to the target file
+        
+    Raises:
+        StorageWriteError: If there are issues writing to the file
+    """
+    path_obj = Path(file_path)
+    
+    # Ensure parent directory exists
+    ensure_dir(path_obj.parent)
+    
+    try:
+        with path_obj.open('w', encoding='utf-8') as f:
+            for item in data_generator:
+                f.write(json.dumps(item))
+                f.write('\n')
+    except Exception as e:
+        logger.error(f"Error writing JSONL to {path_obj}: {e}")
+        from tinylcm.utils.errors import StorageWriteError
+        raise StorageWriteError(f"Failed to write JSONL to {file_path}: {e}")

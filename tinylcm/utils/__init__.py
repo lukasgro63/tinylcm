@@ -16,7 +16,12 @@ from tinylcm.utils.file_utils import (
     get_file_size,
     load_json,
     save_json,
-    list_files
+    list_files,
+    safe_remove,
+    stream_read,
+    stream_write,
+    stream_read_jsonl,
+    stream_write_jsonl
 )
 from tinylcm.utils.metrics import (
     MetricsCalculator,
@@ -56,6 +61,11 @@ __all__ = [
     "load_json",
     "save_json",
     "list_files",
+    "safe_remove",
+    "stream_read",
+    "stream_write",
+    "stream_read_jsonl",
+    "stream_write_jsonl",
 
     # Metrics utilities
     "MetricsCalculator",
