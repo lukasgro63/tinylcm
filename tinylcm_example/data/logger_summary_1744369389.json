@@ -1,0 +1,9 @@
+{
+  "timestamp": 1744369389,
+  "session_id": "c2c27df0-2c46-4f9a-855a-8022eeb5390c",
+  "total_entries": 20,
+  "storage_dir": "tinylcm_example/data",
+  "entry_types": {
+    "image": 20
+  }
+}

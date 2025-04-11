@@ -227,6 +227,9 @@ class InferenceMonitor:
         metrics = self.get_current_metrics()
         timestamp = int(time.time())
         
+        # Add timestamp to metrics to ensure CSV export includes it
+        metrics["timestamp"] = timestamp
+        
         if format.lower() == "json":
             filename = f"metrics_{timestamp}_{self.session_id}.json"
             file_path = self.storage_dir / filename
