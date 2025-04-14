@@ -1,0 +1,220 @@
+[
+  {
+    "confidence": 0.892532724837692,
+    "ground_truth": "bird",
+    "input_id": "img_0000",
+    "latency_ms": 13.777017593383789,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369386.495031
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: cat != bird"
+    ],
+    "confidence": 0.7285783852968643,
+    "ground_truth": "bird",
+    "input_id": "img_0001",
+    "latency_ms": 26.230812072753906,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369386.6250763
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Incorrect prediction: dog != cat"
+    ],
+    "confidence": 0.7315977417236346,
+    "ground_truth": "cat",
+    "input_id": "img_0002",
+    "latency_ms": 31.9979190826416,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369386.7630513
+  },
+  {
+    "confidence": 0.9588942170953049,
+    "ground_truth": "dog",
+    "input_id": "img_0003",
+    "latency_ms": 16.2198543548584,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369386.8811896
+  },
+  {
+    "confidence": 0.8448855608928301,
+    "ground_truth": "bird",
+    "input_id": "img_0004",
+    "latency_ms": 45.599937438964844,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.0306232
+  },
+  {
+    "confidence": 0.7990907510911893,
+    "ground_truth": "dog",
+    "input_id": "img_0005",
+    "latency_ms": 24.6889591217041,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.1595604
+  },
+  {
+    "confidence": 0.7370622994119499,
+    "ground_truth": "bird",
+    "input_id": "img_0006",
+    "latency_ms": 21.023035049438477,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.28323
+  },
+  {
+    "confidence": 0.8383190403615178,
+    "ground_truth": "dog",
+    "input_id": "img_0007",
+    "latency_ms": 29.48474884033203,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.41482
+  },
+  {
+    "confidence": 0.8977325640524284,
+    "ground_truth": "cat",
+    "input_id": "img_0008",
+    "latency_ms": 35.051822662353516,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.5534685
+  },
+  {
+    "confidence": 0.9763825737806152,
+    "ground_truth": "cat",
+    "input_id": "img_0009",
+    "latency_ms": 33.63323211669922,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.6906967
+  },
+  {
+    "confidence": 0.9580755799481304,
+    "ground_truth": "bird",
+    "input_id": "img_0010",
+    "latency_ms": 12.768268585205078,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.8065476
+  },
+  {
+    "confidence": 0.9234190104848143,
+    "ground_truth": "cat",
+    "input_id": "img_0011",
+    "latency_ms": 37.9488468170166,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369387.9505703
+  },
+  {
+    "confidence": 0.7354189547266646,
+    "ground_truth": "cat",
+    "input_id": "img_0012",
+    "latency_ms": 35.51054000854492,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.0884326
+  },
+  {
+    "confidence": 0.8430944037221082,
+    "ground_truth": "bird",
+    "input_id": "img_0013",
+    "latency_ms": 33.26296806335449,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.2249048
+  },
+  {
+    "confidence": 0.7072922002218405,
+    "ground_truth": "cat",
+    "input_id": "img_0014",
+    "latency_ms": 40.57502746582031,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.368474
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "Low confidence: 0.2000 < 0.3000",
+      "Statistically low confidence: 0.2000, z-score: -3.36 < -2.00"
+    ],
+    "confidence": 0.2,
+    "ground_truth": "bird",
+    "input_id": "img_0015",
+    "latency_ms": 47.42240905761719,
+    "metadata": {},
+    "prediction": "bird",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.5218904
+  },
+  {
+    "confidence": 0.7008593171073179,
+    "ground_truth": "dog",
+    "input_id": "img_0016",
+    "latency_ms": 33.68353843688965,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.659934
+  },
+  {
+    "confidence": 0.9451196650907492,
+    "ground_truth": "dog",
+    "input_id": "img_0017",
+    "latency_ms": 17.015457153320312,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.781138
+  },
+  {
+    "anomaly": true,
+    "anomaly_reasons": [
+      "High latency: 200.00ms > 100.00ms",
+      "Statistically high latency: 200.00ms, z-score: 4.11 > 2.00"
+    ],
+    "confidence": 0.7605379062559924,
+    "ground_truth": "dog",
+    "input_id": "img_0018",
+    "latency_ms": 200,
+    "metadata": {},
+    "prediction": "dog",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369388.9098392
+  },
+  {
+    "confidence": 0.8468878510067381,
+    "ground_truth": "cat",
+    "input_id": "img_0019",
+    "latency_ms": 22.804975509643555,
+    "metadata": {},
+    "prediction": "cat",
+    "session_id": "6de6e768-6b32-4410-8a79-8e78fc8cefa0",
+    "timestamp": 1744369389.0385401
+  }
+]

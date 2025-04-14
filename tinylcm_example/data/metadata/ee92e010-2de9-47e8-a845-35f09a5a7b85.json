@@ -1,0 +1,13 @@
+{
+  "confidence": 0.7315977417236346,
+  "entry_id": "ee92e010-2de9-47e8-a845-35f09a5a7b85",
+  "filename": "images/ee92e010-2de9-47e8-a845-35f09a5a7b85.jpg",
+  "input_type": "image",
+  "metadata": {
+    "sequence": 2,
+    "source": "camera_1"
+  },
+  "prediction": "dog",
+  "session_id": "c2c27df0-2c46-4f9a-855a-8022eeb5390c",
+  "timestamp": 1744369386.731042
+}

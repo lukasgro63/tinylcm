@@ -1,0 +1,13 @@
+{
+  "confidence": 0.7072922002218405,
+  "entry_id": "e51f370f-61c8-4e27-9957-eb95114f9cda",
+  "filename": "images/e51f370f-61c8-4e27-9957-eb95114f9cda.jpg",
+  "input_type": "image",
+  "metadata": {
+    "sequence": 14,
+    "source": "camera_1"
+  },
+  "prediction": "cat",
+  "session_id": "c2c27df0-2c46-4f9a-855a-8022eeb5390c",
+  "timestamp": 1744369388.327876
+}

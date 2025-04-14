@@ -6,6 +6,8 @@ This module provides various utility functionalities:
 - file_utils: File operations helpers
 - metrics: Metrics calculation and statistics utilities
 - versioning: Version management and comparison utilities
+- logging: Logging utilities
+- errors: Custom exception types
 """
 
 from tinylcm.utils.config import Config, get_config, set_global_config, load_config
@@ -14,7 +16,12 @@ from tinylcm.utils.file_utils import (
     get_file_size,
     load_json,
     save_json,
-    list_files
+    list_files,
+    safe_remove,
+    stream_read,
+    stream_write,
+    stream_read_jsonl,
+    stream_write_jsonl
 )
 from tinylcm.utils.metrics import (
     MetricsCalculator,
@@ -30,6 +37,16 @@ from tinylcm.utils.versioning import (
     compare_versions,
     get_version_diff
 )
+from tinylcm.utils.logging import setup_logger
+from tinylcm.utils.errors import (
+    TinyLCMError,
+    ModelError, ModelNotFoundError, ModelIntegrityError,
+    StorageError, StorageAccessError, StorageWriteError,
+    ConfigError,
+    DataLoggerError,
+    MonitoringError,
+    InvalidInputError
+)
 
 __all__ = [
     # Configuration
@@ -44,6 +61,11 @@ __all__ = [
     "load_json",
     "save_json",
     "list_files",
+    "safe_remove",
+    "stream_read",
+    "stream_write",
+    "stream_read_jsonl",
+    "stream_write_jsonl",
 
     # Metrics utilities
     "MetricsCalculator",
@@ -57,5 +79,17 @@ __all__ = [
     "calculate_content_hash",
     "create_version_info",
     "compare_versions",
-    "get_version_diff"
+    "get_version_diff",
+    
+    # Logging utilities
+    "setup_logger",
+    
+    # Error classes
+    "TinyLCMError",
+    "ModelError", "ModelNotFoundError", "ModelIntegrityError",
+    "StorageError", "StorageAccessError", "StorageWriteError",
+    "ConfigError",
+    "DataLoggerError",
+    "MonitoringError",
+    "InvalidInputError",
 ]

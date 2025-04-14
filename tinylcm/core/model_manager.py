@@ -17,6 +17,8 @@ from tinylcm.constants import DEFAULT_ACTIVE_MODEL_LINK, DEFAULT_MODELS_DIR
 from tinylcm.utils.config import Config, get_config
 from tinylcm.utils.file_utils import ensure_dir, load_json, save_json
 from tinylcm.utils.versioning import calculate_file_hash
+from tinylcm.utils.logging import setup_logger
+from tinylcm.utils.errors import ModelNotFoundError, ModelIntegrityError, StorageError
 
 
 class ModelFormat(str, Enum):
@@ -126,7 +128,10 @@ class FileSystemModelStorage(ModelStorageStrategy):
 
         # Copy model file to target directory
         target_path = model_dir / source_path.name
-        shutil.copy2(source_path, target_path)
+        try:
+            shutil.copy2(source_path, target_path)
+        except Exception as e:
+            raise StorageError(f"Failed to copy model file: {str(e)}")
 
         # Calculate hash for integrity check
         md5_hash = calculate_file_hash(target_path)
@@ -155,13 +160,13 @@ class FileSystemModelStorage(ModelStorageStrategy):
         model_dir = Path(models_dir) / model_id
 
         if not model_dir.exists():
-            raise ValueError(f"Model directory not found: {model_dir}")
+            raise ModelNotFoundError(f"Model directory not found: {model_dir}")
 
         # Find model file (assuming there's only one file in the directory)
         model_files = [f for f in model_dir.iterdir() if f.is_file()]
 
         if not model_files:
-            raise ValueError(f"No model file found in directory: {model_dir}")
+            raise ModelNotFoundError(f"No model file found in directory: {model_dir}")
 
         return str(model_files[0])
 
@@ -185,8 +190,11 @@ class FileSystemModelStorage(ModelStorageStrategy):
         if not model_dir.exists():
             return False
 
-        shutil.rmtree(model_dir)
-        return True
+        try:
+            shutil.rmtree(model_dir)
+            return True
+        except Exception as e:
+            raise StorageError(f"Failed to delete model directory: {str(e)}")
 
 
 class ModelMetadataProvider(ABC):
@@ -267,6 +275,10 @@ class ModelMetadataProvider(ABC):
 class JSONFileMetadataProvider(ModelMetadataProvider):
     """JSON file implementation of model metadata provider."""
 
+    def __init__(self):
+        """Initialize the provider with a logger."""
+        self.logger = setup_logger(f"{__name__}.{self.__class__.__name__}")
+
     def save_metadata(
         self,
         model_id: str,
@@ -282,7 +294,10 @@ class JSONFileMetadataProvider(ModelMetadataProvider):
             metadata_dir: Directory to save metadata
         """
         metadata_path = Path(metadata_dir) / f"{model_id}.json"
-        save_json(metadata, metadata_path)
+        try:
+            save_json(metadata, metadata_path)
+        except Exception as e:
+            raise StorageError(f"Failed to save metadata: {str(e)}")
 
     def load_metadata(
         self,
@@ -302,9 +317,12 @@ class JSONFileMetadataProvider(ModelMetadataProvider):
         metadata_path = Path(metadata_dir) / f"{model_id}.json"
 
         if not metadata_path.exists():
-            raise ValueError(f"Metadata file not found: {metadata_path}")
+            raise ModelNotFoundError(f"Metadata file not found: {metadata_path}")
 
-        return load_json(metadata_path)
+        try:
+            return load_json(metadata_path)
+        except Exception as e:
+            raise StorageError(f"Failed to load metadata: {str(e)}")
 
     def list_metadata(
         self,
@@ -336,7 +354,7 @@ class JSONFileMetadataProvider(ModelMetadataProvider):
                     metadata_list.append(metadata)
             except Exception as e:
                 # Log but continue
-                print(f"Error loading metadata from {metadata_file}: {str(e)}")
+                self.logger.error(f"Error loading metadata from {metadata_file}: {str(e)}")
 
         return metadata_list
 
@@ -360,8 +378,11 @@ class JSONFileMetadataProvider(ModelMetadataProvider):
         if not metadata_path.exists():
             return False
 
-        metadata_path.unlink()
-        return True
+        try:
+            metadata_path.unlink()
+            return True
+        except Exception as e:
+            raise StorageError(f"Failed to delete metadata file: {str(e)}")
 
 
 class ModelManager:
@@ -388,6 +409,9 @@ class ModelManager:
             config: Configuration (default: global config)
         """
         self.config = config or get_config()
+        
+        # Logger initialisieren
+        self.logger = setup_logger(f"{__name__}.{self.__class__.__name__}")
 
         # Get storage directory from arguments or config
         self.storage_dir = Path(storage_dir or self.config.get("model_manager", "storage_dir", DEFAULT_MODELS_DIR))
@@ -474,14 +498,14 @@ class ModelManager:
                 str: Path to the model file
 
             Raises:
-                ValueError: If model not found
+                ModelNotFoundError: If model not found
             """
             # If no model_id provided, use active model
             if model_id is None:
                 active_link = Path(self.storage_dir) / DEFAULT_ACTIVE_MODEL_LINK
 
                 if not active_link.exists():
-                    raise ValueError("No active model set")
+                    raise ModelNotFoundError("No active model set")
 
                 # Handle both symlink and fallback text file approaches
                 if active_link.is_symlink():
@@ -501,17 +525,17 @@ class ModelManager:
                         with open(active_link, "r", encoding='utf-8') as f:
                             model_id = f.read().strip()
                     except Exception as e:
-                        raise ValueError(f"Failed to read active model reference: {str(e)}")
+                        raise ModelNotFoundError(f"Failed to read active model reference: {str(e)}")
 
             # Validate model exists
             model_dir = Path(self.models_dir) / model_id
             if not model_dir.exists():
-                raise ValueError(f"Model not found: {model_id}")
+                raise ModelNotFoundError(f"Model not found: {model_id}")
 
             # Find model files
             model_files = list(model_dir.glob("*"))
             if not model_files:
-                raise ValueError(f"No model files found in directory: {model_dir}")
+                raise ModelNotFoundError(f"No model files found in directory: {model_dir}")
 
             # Return the path to the first model file
             return str(model_files[0])
@@ -528,14 +552,14 @@ class ModelManager:
             Dict[str, Any]: Model metadata
 
         Raises:
-            ValueError: If model not found
+            ModelNotFoundError: If model not found
         """
         # If no model_id provided, use active model
         if model_id is None:
             active_link = Path(self.storage_dir) / DEFAULT_ACTIVE_MODEL_LINK
 
             if not active_link.exists() or not active_link.is_symlink():
-                raise ValueError("No active model set")
+                raise ModelNotFoundError("No active model set")
 
             model_id = os.path.basename(os.readlink(active_link))
 
@@ -590,13 +614,13 @@ class ModelManager:
                 bool: True if successful
 
             Raises:
-                ValueError: If model not found
+                ModelNotFoundError: If model not found
             """
             # Check if model exists
             model_dir = Path(self.models_dir) / model_id
 
             if not model_dir.exists():
-                raise ValueError(f"Model not found: {model_id}")
+                raise ModelNotFoundError(f"Model not found: {model_id}")
 
             # Update metadata for all models
             all_models = self.list_models()
@@ -625,7 +649,7 @@ class ModelManager:
                     elif active_link.is_dir():
                         shutil.rmtree(active_link)
             except Exception as e:
-                print(f"Warning: Could not remove existing link/file at {active_link}: {e}")
+                self.logger.warning(f"Could not remove existing link/file at {active_link}: {e}")
                 # Continue anyway - we'll try to create the link
 
             # For environments where symlinks might be problematic (Windows, Docker),
@@ -635,13 +659,13 @@ class ModelManager:
                 os.symlink(str(model_dir), str(active_link), target_is_directory=True)
             except (OSError, AttributeError) as e:
                 # If symlink creation fails, create a text file with the model ID instead
-                print(f"Warning: Could not create symlink, using fallback mechanism: {e}")
+                self.logger.warning(f"Could not create symlink, using fallback mechanism: {e}")
                 try:
                     with open(active_link, "w", encoding='utf-8') as f:
                         f.write(model_id)
                     return True
                 except Exception as fallback_error:
-                    raise ValueError(f"Failed to create active model reference: {str(fallback_error)}")
+                    raise StorageError(f"Failed to create active model reference: {str(fallback_error)}")
 
             return True
 
@@ -657,6 +681,7 @@ class ModelManager:
             bool: True if successful
 
         Raises:
+            ModelNotFoundError: If model not found
             ValueError: If trying to delete active model without force
         """
         # Check if it's the active model
@@ -742,7 +767,7 @@ class ModelManager:
             return True
 
         except Exception as e:
-            print(f"Error adding tag to model {model_id}: {str(e)}")
+            self.logger.error(f"Error adding tag to model {model_id}: {str(e)}")
             return False
 
     def remove_tag(self, model_id: str, tag: str) -> bool:
@@ -772,7 +797,7 @@ class ModelManager:
             return True
 
         except Exception as e:
-            print(f"Error removing tag from model {model_id}: {str(e)}")
+            self.logger.error(f"Error removing tag from model {model_id}: {str(e)}")
             return False
 
     def update_metrics(self, model_id: str, metrics: Dict[str, float]) -> bool:
@@ -805,7 +830,7 @@ class ModelManager:
             return True
 
         except Exception as e:
-            print(f"Error updating metrics for model {model_id}: {str(e)}")
+            self.logger.error(f"Error updating metrics for model {model_id}: {str(e)}")
             return False
 
     def verify_model_integrity(self, model_id: str) -> bool:
@@ -833,8 +858,15 @@ class ModelManager:
             current_hash = calculate_file_hash(model_path)
 
             # Compare hashes
-            return current_hash == stored_hash
+            match = current_hash == stored_hash
+            if not match:
+                self.logger.warning(f"Model integrity check failed for {model_id}: hash mismatch")
+                self.logger.debug(f"Expected: {stored_hash}, Got: {current_hash}")
+            
+            return match
 
         except Exception as e:
-            print(f"Error verifying model integrity for {model_id}: {str(e)}")
-            return False
+            self.logger.error(f"Error verifying model integrity for {model_id}: {str(e)}")
+            if isinstance(e, ModelNotFoundError):
+                raise
+            raise ModelIntegrityError(f"Failed to verify model integrity: {str(e)}")
