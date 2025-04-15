@@ -1,0 +1,12 @@
+{
+  "accuracy": 0.92,
+  "precision": 0.88,
+  "recall": 0.9,
+  "f1": 0.89,
+  "latency_ms": {
+    "mean": 15.3,
+    "median": 12.8,
+    "min": 8.2,
+    "max": 45.7
+  }
+}

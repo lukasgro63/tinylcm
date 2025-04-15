@@ -1,0 +1,41 @@
+{
+  "compression": "gzip",
+  "creation_time": 1744739322.8060496,
+  "description": "Sample package with model and data",
+  "device_id": "edge_device_1",
+  "files": [
+    {
+      "file_type": "model",
+      "hash": "bf98a5e62a7a6a245b3901d84fa6f1c0",
+      "metadata": {
+        "framework": "custom",
+        "model_type": "classifier"
+      },
+      "original_path": "tinylcm_sync_example/models/sample_model.json",
+      "package_path": "sample_model.json",
+      "size_bytes": 200,
+      "timestamp": 1744739322.8077276
+    },
+    {
+      "file_type": "metrics",
+      "hash": "60e0bc2a28b4dfdf2e327120ac3ed718",
+      "metadata": {},
+      "original_path": "tinylcm_sync_example/data/metrics.json",
+      "package_path": "metrics.json",
+      "size_bytes": 167,
+      "timestamp": 1744739322.80917
+    },
+    {
+      "file_type": "logs",
+      "hash": "71e3e12fcff06f72cc23825dc832c2ae",
+      "metadata": {},
+      "original_path": "tinylcm_sync_example/data/inferences.jsonl",
+      "package_path": "inferences.jsonl",
+      "size_bytes": 1278,
+      "timestamp": 1744739322.8132062
+    }
+  ],
+  "is_finalized": true,
+  "package_id": "00f58196-9543-4c93-a3f0-69b8b79b1032",
+  "package_type": "mixed"
+}

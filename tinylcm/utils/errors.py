@@ -57,3 +57,7 @@ class MonitoringError(TinyLCMError):
 class InvalidInputError(TinyLCMError):
     """Invalid input data."""
     pass
+
+class SyncError(TinyLCMError):
+    """Errors related to synchronization."""
+    pass

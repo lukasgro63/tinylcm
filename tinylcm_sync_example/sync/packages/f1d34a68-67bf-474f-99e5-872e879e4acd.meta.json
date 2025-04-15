@@ -1,0 +1,29 @@
+{
+  "compression": "gzip",
+  "creation_time": 1744739138.564773,
+  "description": "Package with component data",
+  "device_id": "edge_device_1",
+  "files": [
+    {
+      "file_type": "metrics",
+      "hash": "0cabbef33d6b52b209c68d130e284a59",
+      "metadata": {},
+      "original_path": "tinylcm_sync_example/monitor/metrics_1744739138_294604ba-e2bc-474e-82a0-b99b50ddbc94.json",
+      "package_path": "metrics_1744739138_294604ba-e2bc-474e-82a0-b99b50ddbc94.json",
+      "size_bytes": 664,
+      "timestamp": 1744739138.60508
+    },
+    {
+      "file_type": "data_log",
+      "hash": "149df13a78996e19520ba86858ad1d46",
+      "metadata": {},
+      "original_path": "tinylcm_sync_example/data_logger/export_1744739138.csv",
+      "package_path": "export_1744739138.csv",
+      "size_bytes": 799,
+      "timestamp": 1744739138.6294222
+    }
+  ],
+  "is_finalized": true,
+  "package_id": "f1d34a68-67bf-474f-99e5-872e879e4acd",
+  "package_type": "components"
+}

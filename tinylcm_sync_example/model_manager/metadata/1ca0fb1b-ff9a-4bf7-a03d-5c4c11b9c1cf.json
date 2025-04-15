@@ -1,0 +1,12 @@
+{
+  "description": "Sample model for sync demo",
+  "filename": "sample_model.json",
+  "is_active": true,
+  "md5_hash": "bf98a5e62a7a6a245b3901d84fa6f1c0",
+  "metrics": {},
+  "model_format": "json",
+  "model_id": "1ca0fb1b-ff9a-4bf7-a03d-5c4c11b9c1cf",
+  "tags": [],
+  "timestamp": 1744739426.0723279,
+  "version": "v1"
+}

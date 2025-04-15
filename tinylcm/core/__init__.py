@@ -8,6 +8,7 @@ This module provides the main functional components of TinyLCM:
 - InferenceMonitor: For monitoring inference performance
 - DriftDetector: For detecting data and prediction drift
 - AnomalyDetectors: For detecting anomalies in model behavior
+- SyncInterface: For preparing data for synchronization
 """
 
 from tinylcm.core.model_manager import ModelManager
@@ -31,6 +32,7 @@ from tinylcm.core.anomaly_detectors import (
     anomaly_detector_registry
 )
 from tinylcm.core.metrics_collector import InferenceMetricsCollector
+from tinylcm.core.sync_interface import SyncInterface, SyncPackage
 
 __all__ = [
     # Model management
@@ -56,5 +58,9 @@ __all__ = [
     "ConfidenceDriftDetector", 
     "PredictionFrequencyDriftDetector",
     "CompositeDriftDetector",
-    "drift_detector_registry"
+    "drift_detector_registry",
+    
+    # Synchronization
+    "SyncInterface",
+    "SyncPackage"
 ]

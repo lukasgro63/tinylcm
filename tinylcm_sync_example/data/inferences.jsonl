@@ -1,0 +1,10 @@
+{"timestamp": 1744739426.0231435, "input_id": "input_0", "prediction": "class_a", "confidence": 0.7, "latency_ms": 10}
+{"timestamp": 1744739427.0231469, "input_id": "input_1", "prediction": "class_b", "confidence": 0.7999999999999999, "latency_ms": 12}
+{"timestamp": 1744739428.0231476, "input_id": "input_2", "prediction": "class_a", "confidence": 0.8999999999999999, "latency_ms": 14}
+{"timestamp": 1744739429.023148, "input_id": "input_3", "prediction": "class_b", "confidence": 0.7, "latency_ms": 16}
+{"timestamp": 1744739430.0231485, "input_id": "input_4", "prediction": "class_a", "confidence": 0.7999999999999999, "latency_ms": 18}
+{"timestamp": 1744739431.023149, "input_id": "input_5", "prediction": "class_b", "confidence": 0.8999999999999999, "latency_ms": 20}
+{"timestamp": 1744739432.0231493, "input_id": "input_6", "prediction": "class_a", "confidence": 0.7, "latency_ms": 22}
+{"timestamp": 1744739433.0231497, "input_id": "input_7", "prediction": "class_b", "confidence": 0.7999999999999999, "latency_ms": 24}
+{"timestamp": 1744739434.0231504, "input_id": "input_8", "prediction": "class_a", "confidence": 0.8999999999999999, "latency_ms": 26}
+{"timestamp": 1744739435.023151, "input_id": "input_9", "prediction": "class_b", "confidence": 0.7, "latency_ms": 28}

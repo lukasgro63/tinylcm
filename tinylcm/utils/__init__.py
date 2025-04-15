@@ -45,7 +45,8 @@ from tinylcm.utils.errors import (
     ConfigError,
     DataLoggerError,
     MonitoringError,
-    InvalidInputError
+    InvalidInputError,
+    SyncError
 )
 
 __all__ = [
@@ -90,6 +91,7 @@ __all__ = [
     "StorageError", "StorageAccessError", "StorageWriteError",
     "ConfigError",
     "DataLoggerError",
-    "MonitoringError",
+    "MonitoringError", 
     "InvalidInputError",
+    "SyncError",
 ]
