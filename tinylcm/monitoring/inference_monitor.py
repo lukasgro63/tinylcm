@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from tinylcm.constants import DEFAULT_INFERENCE_DIR, DEFAULT_LOG_INTERVAL, DEFAULT_MEMORY_ENTRIES
-from tinylcm.core.monitoring.anomaly_detectors import (
+from tinylcm.monitoring.anomaly_detectors import (
     CompositeAnomalyDetector,
     StatisticalAnomalyDetector,
     ThresholdAnomalyDetector,
     anomaly_detector_registry
 )
-from tinylcm.core.monitoring.metrics_collector import InferenceMetricsCollector
+from tinylcm.monitoring.metrics_collector import InferenceMetricsCollector
 from tinylcm.interfaces.monitoring import AnomalyDetector, MetricsProvider
 from tinylcm.utils.config import Config, get_config
 from tinylcm.utils.errors import MonitoringError
@@ -209,7 +209,11 @@ class InferenceMonitor:
         Returns:
             Dict[str, Any]: Dictionary of current metrics
         """
-        return self.metrics_collector.get_metrics()
+        metrics = self.metrics_collector.get_metrics()
+        
+        metrics["session_id"] = self.session_id
+        
+        return metrics
 
     def export_metrics(self, format: str = "json") -> str:
         """

@@ -24,3 +24,5 @@ WORKDIR /workspace
 
 # Switch to non-root user
 USER $USERNAME
+
+ENV PATH="/home/vscode/.local/bin:${PATH}"

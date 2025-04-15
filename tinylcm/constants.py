@@ -148,5 +148,12 @@ DEFAULT_CONFIG: Final[Dict[str, Dict[str, Any]]] = {
         "log_dir": DEFAULT_LOG_DIR,
         "level": "INFO",
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    },
+    "drift_detector": {
+        "storage_dir": DEFAULT_DRIFT_DIR,
+        "window_size": 100,
+        "alert_threshold": 0.2,
+        "check_interval": 60.0,  # Check for drift every 60 seconds
+        "enabled": True
     }
 }
