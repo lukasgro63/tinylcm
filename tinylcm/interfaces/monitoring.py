@@ -82,3 +82,45 @@ class DataStreamProcessor(ABC):
             Processed records
         """
         pass
+
+# tinylcm/interfaces/monitoring.py - Ergänzung
+class DriftDetector(ABC):
+    """Abstract base class for drift detection."""
+    
+    @abstractmethod
+    def create_reference_distribution(self, data: Dict[str, Any]) -> None:
+        """
+        Create a reference distribution from data.
+        
+        Args:
+            data: Dictionary with reference data
+        """
+        pass
+    
+    @abstractmethod
+    def update(self, record: Dict[str, Any]) -> bool:
+        """
+        Update the detector with a new record.
+        
+        Args:
+            record: New data record
+            
+        Returns:
+            bool: True if drift was detected after this update
+        """
+        pass
+    
+    @abstractmethod
+    def check_for_drift(self) -> Dict[str, Any]:
+        """
+        Check if drift has occurred between reference and current distributions.
+        
+        Returns:
+            Dict[str, Any]: Drift check results
+        """
+        pass
+    
+    @abstractmethod
+    def reset(self) -> None:
+        """Reset the detector state."""
+        pass
