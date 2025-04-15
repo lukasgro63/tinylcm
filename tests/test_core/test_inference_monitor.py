@@ -8,9 +8,9 @@ import time
 
 import pytest
 
-from tinylcm.monitoring.inference_monitor import InferenceMonitor
-from tinylcm.monitoring.anomaly_detectors import ThresholdAnomalyDetector
-from tinylcm.monitoring.metrics_collector import InferenceMetricsCollector
+from tinylcm.core.inference_monitor import InferenceMonitor
+from tinylcm.core.anomaly_detectors import ThresholdAnomalyDetector
+from tinylcm.core.metrics_collector import InferenceMetricsCollector
 
 
 class TestInferenceMonitor:

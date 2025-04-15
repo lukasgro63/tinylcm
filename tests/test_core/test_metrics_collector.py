@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 
-from tinylcm.monitoring.metrics_collector import InferenceMetricsCollector
+from tinylcm.core.metrics_collector import InferenceMetricsCollector
 
 
 class TestInferenceMetricsCollector:

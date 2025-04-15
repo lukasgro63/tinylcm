@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from tinylcm.monitoring.drift_detector import (
+from tinylcm.core.drift_detector import (
     DriftDetector,
     DistributionDriftDetector,
     FeatureStatisticsDriftDetector,

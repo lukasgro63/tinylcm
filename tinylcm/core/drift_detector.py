@@ -420,6 +420,7 @@ class DistributionDriftDetector(DriftDetector):
             "drift_detected": drift_detected,
             "drift_type": "prediction_distribution",
             "distance": float(tvd),
+            "similarity_score": float(1 - tvd),
             "threshold": self.threshold,
             "reference_distribution": reference_dist,
             "current_distribution": current_distribution

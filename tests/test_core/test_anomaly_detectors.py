@@ -2,7 +2,7 @@
 
 import pytest
 
-from tinylcm.monitoring.anomaly_detectors import (
+from tinylcm.core.anomaly_detectors import (
     ThresholdAnomalyDetector,
     StatisticalAnomalyDetector,
     CompositeAnomalyDetector,

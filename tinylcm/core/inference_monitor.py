@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from tinylcm.constants import DEFAULT_INFERENCE_DIR, DEFAULT_LOG_INTERVAL, DEFAULT_MEMORY_ENTRIES
-from tinylcm.monitoring.anomaly_detectors import (
+from tinylcm.core.anomaly_detectors import (
     CompositeAnomalyDetector,
     StatisticalAnomalyDetector,
     ThresholdAnomalyDetector,
     anomaly_detector_registry
 )
-from tinylcm.monitoring.metrics_collector import InferenceMetricsCollector
+from tinylcm.core.metrics_collector import InferenceMetricsCollector
 from tinylcm.interfaces.monitoring import AnomalyDetector, MetricsProvider
 from tinylcm.utils.config import Config, get_config
 from tinylcm.utils.errors import MonitoringError
