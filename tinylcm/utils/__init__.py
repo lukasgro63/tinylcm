@@ -94,4 +94,5 @@ __all__ = [
     "MonitoringError", 
     "InvalidInputError",
     "SyncError",
+    "ConnectionError"
 ]

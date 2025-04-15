@@ -61,3 +61,7 @@ class InvalidInputError(TinyLCMError):
 class SyncError(TinyLCMError):
     """Errors related to synchronization."""
     pass
+
+class ConnectionError(TinyLCMError):
+    """Errors related to network connections."""
+    pass
