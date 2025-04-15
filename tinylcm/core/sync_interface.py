@@ -421,14 +421,27 @@ class SyncInterface:
                 model_path = model_manager.load_model()
                 
                 # Get model metadata for the active model
-                # Since the active model was just loaded, we can get it without a specific ID
-                model_meta = model_manager.get_model_metadata()
+                try:
+                    model_meta = model_manager.get_active_model_metadata()
+                    # Ensure we have a serializable dictionary
+                    if hasattr(model_meta, "items"):
+                        # Extract only basic serializable data types
+                        safe_meta = {}
+                        for key, value in model_meta.items():
+                            if isinstance(value, (str, int, float, bool, list, dict)) or value is None:
+                                safe_meta[key] = value
+                    else:
+                        # Fallback for non-dictionary objects
+                        safe_meta = {"note": "Model metadata extraction limited"}
+                except Exception as meta_err:
+                    self.logger.warning(f"Error extracting model metadata: {meta_err}")
+                    safe_meta = {}
                 
                 self.add_file_to_package(
                     package_id=package_id,
                     file_path=model_path,
                     file_type="model",
-                    metadata=model_meta
+                    metadata=safe_meta
                 )
                 
                 self.logger.debug(f"Added model from ModelManager to package {package_id}")
