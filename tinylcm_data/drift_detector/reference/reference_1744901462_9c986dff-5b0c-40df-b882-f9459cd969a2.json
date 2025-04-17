@@ -1,0 +1,18 @@
+{
+  "distribution": {
+    "class_distribution": {
+      "bird": 0.15384615384615385,
+      "cat": 0.46153846153846156,
+      "dog": 0.3076923076923077,
+      "fish": 0.07692307692307693
+    }
+  },
+  "metadata": {
+    "created_at": 1744901462.0361295,
+    "sample_count": 13,
+    "session_id": "9c986dff-5b0c-40df-b882-f9459cd969a2",
+    "threshold": 0.1,
+    "timestamp": 1744901462.0361285,
+    "window_size": 100
+  }
+}

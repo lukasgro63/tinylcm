@@ -1,41 +1,27 @@
-"""Tests for SyncInterface component."""
-
 import json
 import os
 import shutil
 import tempfile
 import time
-import uuid
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-# Import the component we will be testing
-from tinylcm.core.sync_interface import SyncInterface, SyncPackage
+from tinylcm.client.sync_interface import SyncInterface, SyncPackage
 from tinylcm.utils.errors import SyncError
 
 
 class TestSyncInterface:
-    """Test SyncInterface functionality."""
-
     def setup_method(self):
-        """Set up temporary directory for tests."""
         self.temp_dir = tempfile.mkdtemp()
         self.sync_dir = os.path.join(self.temp_dir, "sync")
         self.sync_interface = SyncInterface(sync_dir=self.sync_dir)
-        
-        # Create some test data
         self.test_data_dir = os.path.join(self.temp_dir, "test_data")
         os.makedirs(self.test_data_dir, exist_ok=True)
-        
-        # Create a sample model file
         self.model_file = os.path.join(self.test_data_dir, "model.json")
         self.model_data = {"weights": [1.0, 2.0, 3.0], "layers": [5, 3, 1]}
         with open(self.model_file, "w", encoding="utf-8") as f:
             json.dump(self.model_data, f)
-            
-        # Create a sample metrics file
         self.metrics_file = os.path.join(self.test_data_dir, "metrics.json")
         self.metrics_data = {
             "accuracy": 0.95,
@@ -44,8 +30,6 @@ class TestSyncInterface:
         }
         with open(self.metrics_file, "w", encoding="utf-8") as f:
             json.dump(self.metrics_data, f)
-            
-        # Create a sample log file
         self.log_file = os.path.join(self.test_data_dir, "log.jsonl")
         self.log_entries = [
             {"timestamp": time.time(), "level": "INFO", "message": "Test log 1"},
@@ -56,55 +40,35 @@ class TestSyncInterface:
                 f.write(json.dumps(entry) + "\n")
 
     def teardown_method(self):
-        """Clean up temporary directory."""
         shutil.rmtree(self.temp_dir)
 
     def test_init_creates_directories(self):
-        """Test that initialization creates necessary directories."""
         assert os.path.exists(self.sync_dir)
         assert os.path.exists(os.path.join(self.sync_dir, "packages"))
         assert os.path.exists(os.path.join(self.sync_dir, "history"))
 
     def test_create_sync_package(self):
-        """Test creating a sync package with data."""
-        # Create a sync package
         package_id = self.sync_interface.create_package(
             device_id="test_device_1",
             package_type="models",
             description="Test model package"
         )
-        
-        # Check that package_id is a string
         assert isinstance(package_id, str)
-        
-        # Add a file to the package
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.model_file,
             file_type="model",
             metadata={"model_name": "test_model", "version": "1.0"}
         )
-        
-        # Finalize the package
         package_path = self.sync_interface.finalize_package(package_id)
-        
-        # Check that package file exists
         assert os.path.exists(package_path)
-        
-        # Check package content
         with open(package_path, "rb") as f:
             package_data = f.read()
-            
-        # Should be non-empty
         assert len(package_data) > 0
-        
-        # Check package metadata
         metadata_path = os.path.join(self.sync_dir, "packages", f"{package_id}.meta.json")
         assert os.path.exists(metadata_path)
-        
         with open(metadata_path, "r", encoding="utf-8") as f:
             metadata = json.load(f)
-            
         assert metadata["device_id"] == "test_device_1"
         assert metadata["package_type"] == "models"
         assert "creation_time" in metadata
@@ -113,40 +77,29 @@ class TestSyncInterface:
         assert metadata["files"][0]["file_type"] == "model"
 
     def test_add_multiple_files_to_package(self):
-        """Test adding multiple files to a package."""
-        # Create a sync package
         package_id = self.sync_interface.create_package(
             device_id="test_device_1",
             package_type="mixed"
         )
-        
-        # Add multiple files
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.model_file,
             file_type="model"
         )
-        
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.metrics_file,
             file_type="metrics"
         )
-        
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.log_file,
             file_type="logs"
         )
-        
-        # Finalize the package
         package_path = self.sync_interface.finalize_package(package_id)
-        
-        # Check package metadata
         metadata_path = os.path.join(self.sync_dir, "packages", f"{package_id}.meta.json")
         with open(metadata_path, "r", encoding="utf-8") as f:
             metadata = json.load(f)
-            
         assert len(metadata["files"]) == 3
         file_types = [f["file_type"] for f in metadata["files"]]
         assert "model" in file_types
@@ -154,35 +107,23 @@ class TestSyncInterface:
         assert "logs" in file_types
 
     def test_add_directory_to_package(self):
-        """Test adding an entire directory to a package."""
-        # Create a sync package
         package_id = self.sync_interface.create_package(
             device_id="test_device_1",
             package_type="data"
         )
-        
-        # Add directory
         self.sync_interface.add_directory_to_package(
             package_id=package_id,
             directory_path=self.test_data_dir,
             recursive=True,
             file_type="data"
         )
-        
-        # Finalize the package
         package_path = self.sync_interface.finalize_package(package_id)
-        
-        # Check package metadata
         metadata_path = os.path.join(self.sync_dir, "packages", f"{package_id}.meta.json")
         with open(metadata_path, "r", encoding="utf-8") as f:
             metadata = json.load(f)
-            
-        # Should have added all files in the directory
-        assert len(metadata["files"]) == 3  # model.json, metrics.json, log.jsonl
+        assert len(metadata["files"]) == 3
 
     def test_create_package_from_component(self):
-        """Test creating a package from a component."""
-        # Create mock components
         mock_model_manager = MagicMock()
         mock_model_manager.get_active_model_metadata.return_value = {
             "model_id": "test_model_123",
@@ -190,165 +131,114 @@ class TestSyncInterface:
             "version": "1.0"
         }
         mock_model_manager.load_model.return_value = self.model_file
-        
         mock_monitor = MagicMock()
         mock_monitor.export_metrics.return_value = self.metrics_file
-        
-        # Create package from components
         package_id = self.sync_interface.create_package_from_components(
             device_id="test_device_1",
             model_manager=mock_model_manager,
             inference_monitor=mock_monitor
         )
-        
-        # Finalize the package
         package_path = self.sync_interface.finalize_package(package_id)
-        
-        # Check package metadata
         metadata_path = os.path.join(self.sync_dir, "packages", f"{package_id}.meta.json")
         with open(metadata_path, "r", encoding="utf-8") as f:
             metadata = json.load(f)
-            
-        # Should have added files from both components
         assert len(metadata["files"]) == 2
-        
-        # Verify component methods were called
         mock_model_manager.get_active_model_metadata.assert_called_once()
         mock_monitor.export_metrics.assert_called_once()
 
     def test_compression_options(self):
-        """Test different compression options."""
-        # Test with gzip compression
         package_id = self.sync_interface.create_package(
             device_id="test_device_1",
             package_type="models",
             compression="gzip"
         )
-        
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.model_file,
             file_type="model"
         )
-        
         gzip_package_path = self.sync_interface.finalize_package(package_id)
         gzip_size = os.path.getsize(gzip_package_path)
-        
-        # Test with zip compression
         package_id = self.sync_interface.create_package(
             device_id="test_device_1",
             package_type="models",
             compression="zip"
         )
-        
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.model_file,
             file_type="model"
         )
-        
         zip_package_path = self.sync_interface.finalize_package(package_id)
         zip_size = os.path.getsize(zip_package_path)
-        
-        # Both should create non-empty files
         assert gzip_size > 0
         assert zip_size > 0
 
     def test_list_packages(self):
-        """Test listing available packages."""
-        # Create a few packages
         for i in range(3):
             package_id = self.sync_interface.create_package(
                 device_id=f"device_{i}",
                 package_type="data"
             )
-            
             self.sync_interface.add_file_to_package(
                 package_id=package_id,
                 file_path=self.model_file,
                 file_type="model"
             )
-            
             self.sync_interface.finalize_package(package_id)
-        
-        # List packages
         packages = self.sync_interface.list_packages()
-        
-        # Should have 3 packages
         assert len(packages) == 3
-        
-        # List with filter
         device1_packages = self.sync_interface.list_packages(
             filter_func=lambda pkg: pkg["device_id"] == "device_1"
         )
-        
         assert len(device1_packages) == 1
         assert device1_packages[0]["device_id"] == "device_1"
 
     def test_mark_as_synced(self):
-        """Test marking a package as synchronized."""
-        # Create a package
         package_id = self.sync_interface.create_package(
             device_id="test_device",
             package_type="logs"
         )
-        
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.log_file,
             file_type="logs"
         )
-        
         self.sync_interface.finalize_package(package_id)
-        
-        # Mark as synced
         self.sync_interface.mark_as_synced(
             package_id=package_id,
             sync_time=time.time(),
             server_id="test_server_1",
             status="success"
         )
-        
-        # Check package history
         packages = self.sync_interface.list_packages(include_synced=True)
-        
-        # Should show as synced
         synced_package = next((p for p in packages if p["package_id"] == package_id), None)
         assert synced_package is not None
         assert synced_package["sync_status"] == "success"
         assert "sync_time" in synced_package
 
     def test_error_handling(self):
-        """Test error handling for various scenarios."""
-        # Test adding file to non-existent package
         with pytest.raises(SyncError):
             self.sync_interface.add_file_to_package(
                 package_id="non_existent_package",
                 file_path=self.model_file,
                 file_type="model"
             )
-        
-        # Test adding non-existent file
         package_id = self.sync_interface.create_package(
             device_id="test_device",
             package_type="models"
         )
-        
         with pytest.raises(FileNotFoundError):
             self.sync_interface.add_file_to_package(
                 package_id=package_id,
                 file_path="/path/to/nonexistent/file.txt",
                 file_type="unknown"
             )
-        
-        # Test finalizing already finalized package
         self.sync_interface.add_file_to_package(
             package_id=package_id,
             file_path=self.model_file,
             file_type="model"
         )
-        
         self.sync_interface.finalize_package(package_id)
-        
         with pytest.raises(SyncError):
             self.sync_interface.finalize_package(package_id)

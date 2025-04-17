@@ -7,7 +7,6 @@ This module provides the main functional components of TinyLCM:
 - TrainingTracker: For tracking training runs and experiments
 - InferenceMonitor: For monitoring inference performance
 - DriftDetector: For detecting data and prediction drift
-- SyncInterface: For preparing data for synchronization
 """
 
 from tinylcm.core.model_manager import ModelManager
@@ -31,7 +30,6 @@ from tinylcm.core.drift_detector import (
     CompositeDriftDetector,
     drift_detector_registry
 )
-from tinylcm.core.sync_interface import SyncInterface, SyncPackage
 
 __all__ = [
     # Model management
@@ -58,8 +56,4 @@ __all__ = [
     "PredictionFrequencyDriftDetector",
     "CompositeDriftDetector",
     "drift_detector_registry",
-    
-    # Synchronization
-    "SyncInterface",
-    "SyncPackage"
 ]

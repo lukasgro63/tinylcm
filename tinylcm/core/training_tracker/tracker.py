@@ -22,25 +22,14 @@ from tinylcm.utils.versioning import calculate_file_hash
 
 
 class TrainingTracker:
-    """
-    Tracker for machine learning training runs.
-    
-    Tracks parameters, metrics, and artifacts for model training runs
-    in a format that's compatible with MLflow for later synchronization.
-    """
+
     
     def __init__(
         self,
         storage_dir: Optional[Union[str, Path]] = None,
         config: Optional[Config] = None
     ):
-        """
-        Initialize the training tracker.
-        
-        Args:
-            storage_dir: Directory for storing run data
-            config: Configuration object
-        """
+
         self.config = config or get_config()
         component_config = self.config.get_component_config("training_tracker")
         
@@ -71,24 +60,7 @@ class TrainingTracker:
         nested: bool = False,
         resume: bool = False
     ) -> str:
-        """
-        Start a new training run.
-        
-        Args:
-            run_name: Name of the run
-            run_id: Specific run ID (if None, auto-generated)
-            description: Optional description
-            tags: Optional tags for the run
-            nested: If True, this is a child run of the current active run
-            resume: If True, try to resume a previous run with the same name
-            
-        Returns:
-            str: Run ID
-            
-        Raises:
-            ValueError: If trying to start a nested run with no active parent
-        """
-        # If resuming, try to find an existing run with the same name
+
         if resume:
             existing_runs = self.list_runs(
                 filter_func=lambda run: run.get("run_name") == run_name and run.get("status") != STATUS_RUNNING
@@ -144,20 +116,7 @@ class TrainingTracker:
         run_id: Optional[str] = None,
         status: str = STATUS_COMPLETED
     ) -> bool:
-        """
-        End a training run.
-        
-        Args:
-            run_id: Run ID to end (if None, uses active run)
-            status: Final status (COMPLETED, FAILED, etc.)
-            
-        Returns:
-            bool: True if successful
-            
-        Raises:
-            ValueError: If no run ID provided and no active run
-        """
-        # Determine which run to end
+
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
@@ -181,7 +140,6 @@ class TrainingTracker:
             metadata["end_time"] = time.time()
             save_json(metadata, metadata_path)
             
-            # If this was the active run, clear it
             if run_id == self.active_run_id:
                 # If we have a run stack, pop and restore the parent
                 if self.run_stack:
@@ -203,20 +161,7 @@ class TrainingTracker:
         value: Any,
         run_id: Optional[str] = None
     ) -> bool:
-        """
-        Log a parameter for a run.
-        
-        Args:
-            key: Parameter name
-            value: Parameter value
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            bool: True if successful
-            
-        Raises:
-            ValueError: If no run ID provided and no active run
-        """
+
         if not key:
             raise ValueError("Parameter key cannot be empty")
         
@@ -259,17 +204,7 @@ class TrainingTracker:
         params_dict: Dict[str, Any],
         run_id: Optional[str] = None
     ) -> bool:
-        """
-        Log multiple parameters for a run.
-        
-        Args:
-            params_dict: Dictionary of parameter names and values
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            bool: True if successful
-        """
-        # Validate
+
         if not params_dict:
             return True  # Nothing to log
         
@@ -314,21 +249,7 @@ class TrainingTracker:
         step: Optional[int] = None,
         run_id: Optional[str] = None
     ) -> bool:
-        """
-        Log a metric for a run.
-        
-        Args:
-            key: Metric name
-            value: Metric value (should be numeric)
-            step: Optional step number (for tracking progress)
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            bool: True if successful
-            
-        Raises:
-            ValueError: If no run ID provided and no active run
-        """
+
         if not key:
             raise ValueError("Metric key cannot be empty")
         
@@ -382,18 +303,7 @@ class TrainingTracker:
         step: Optional[int] = None,
         run_id: Optional[str] = None
     ) -> bool:
-        """
-        Log multiple metrics for a run.
-        
-        Args:
-            metrics_dict: Dictionary of metric names and values
-            step: Optional step number (for tracking progress)
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            bool: True if successful
-        """
-        # Validate
+
         if not metrics_dict:
             return True  # Nothing to log
         
@@ -412,23 +322,7 @@ class TrainingTracker:
         description: Optional[str] = None,
         run_id: Optional[str] = None
     ) -> str:
-        """
-        Log an artifact for a run.
-        
-        Args:
-            local_path: Path to the artifact file
-            artifact_path: Path within the artifacts directory (if None, uses filename)
-            description: Optional description of the artifact
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            str: Path to the stored artifact
-            
-        Raises:
-            ValueError: If no run ID provided and no active run
-            FileNotFoundError: If the artifact file is not found
-        """
-        # Determine which run to use first
+
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
@@ -476,40 +370,21 @@ class TrainingTracker:
         description: Optional[str] = None,
         run_id: Optional[str] = None
     ) -> str:
-        """
-        Log a figure artifact for a run.
-        
-        Args:
-            figure_data: Figure data as bytes
-            name: Figure name with extension (e.g., "plot.png")
-            description: Optional description of the figure
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            str: Path to the stored figure
-            
-        Raises:
-            ValueError: If no run ID provided and no active run
-        """
-        # Determine which run to use
+
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
                 raise ValueError("No active run for logging figures")
         
-        # Create artifact directory for this run
         run_artifacts_dir = ensure_dir(self.artifacts_dir / run_id / "figures")
         
-        # Create destination path
         dest_path = run_artifacts_dir / name
         ensure_dir(dest_path.parent)
         
-        # Write the figure data
         try:
             with open(dest_path, "wb") as f:
                 f.write(figure_data)
             
-            # Update artifacts list
             self._update_artifacts_list(
                 run_id=run_id,
                 artifact_name=name,
@@ -532,24 +407,7 @@ class TrainingTracker:
         custom_properties: Optional[Dict[str, Any]] = None,
         run_id: Optional[str] = None
     ) -> str:
-        """
-        Log a model artifact for a run.
-        
-        Args:
-            model_path: Path to the model file
-            model_format: Format of the model (e.g., "tflite", "onnx", "pytorch")
-            flavor: Model flavor (e.g., "tensorflow", "pytorch", "custom")
-            custom_properties: Additional properties for the model
-            run_id: Run ID (if None, uses active run)
-            
-        Returns:
-            str: Path to the stored model directory
-            
-        Raises:
-            ValueError: If no run ID provided and no active run
-            FileNotFoundError: If the model file is not found
-        """
-        # Check if file exists
+
         path_obj = Path(model_path)
         if not path_obj.exists():
             raise FileNotFoundError(f"Model file not found: {model_path}")
@@ -606,17 +464,7 @@ class TrainingTracker:
         artifact_type: str,
         description: Optional[str] = None
     ) -> None:
-        """
-        Update the list of artifacts for a run.
-        
-        Args:
-            run_id: Run ID
-            artifact_name: Name of the artifact
-            artifact_path: Path to the artifact
-            artifact_type: Type of artifact (file, figure, model)
-            description: Optional description
-        """
-        # Get run directory
+
         run_dir = self.runs_dir / run_id
         
         # Load existing artifacts list or create new
@@ -643,23 +491,10 @@ class TrainingTracker:
         # Add to artifacts list
         artifacts.append(artifact_entry)
         
-        # Save artifacts list
         save_json(artifacts, artifacts_path)
     
     def get_run_info(self, run_id: str) -> Dict[str, Any]:
-        """
-        Get information about a run.
-        
-        Args:
-            run_id: Run ID
-            
-        Returns:
-            Dict[str, Any]: Run information
-            
-        Raises:
-            ValueError: If run not found
-        """
-        # Get run directory
+
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             raise ValueError(f"Run not found: {run_id}")
@@ -710,15 +545,7 @@ class TrainingTracker:
         self,
         filter_func: Optional[Callable[[Dict[str, Any]], bool]] = None
     ) -> List[Dict[str, Any]]:
-        """
-        List all runs.
-        
-        Args:
-            filter_func: Optional function to filter runs
-            
-        Returns:
-            List[Dict[str, Any]]: List of run information
-        """
+
         runs = []
         
         # Iterate through run directories
@@ -743,16 +570,7 @@ class TrainingTracker:
         return runs
     
     def delete_run(self, run_id: str) -> bool:
-        """
-        Delete a run.
-        
-        Args:
-            run_id: Run ID
-            
-        Returns:
-            bool: True if deleted successfully
-        """
-        # Get run directory
+
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             return False
@@ -773,16 +591,7 @@ class TrainingTracker:
             return False
     
     def backup_run(self, run_id: str) -> bool:
-        """
-        Backup a run.
-        
-        Args:
-            run_id: Run ID
-            
-        Returns:
-            bool: True if backup was successful
-        """
-        # Get run directory
+
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             self.logger.warning(f"Run not found for backup: {run_id}")
@@ -810,16 +619,7 @@ class TrainingTracker:
             return False
     
     def restore_run(self, run_id: str) -> bool:
-        """
-        Restore a run from backup.
-        
-        Args:
-            run_id: Run ID
-            
-        Returns:
-            bool: True if restore was successful
-        """
-        # Get backup directory
+
         backup_dir = self.backups_dir / run_id
         if not backup_dir.exists():
             self.logger.warning(f"Backup not found for run: {run_id}")
@@ -829,7 +629,6 @@ class TrainingTracker:
             # Create run directory
             run_dir = ensure_dir(self.runs_dir / run_id)
             
-            # Copy backup files
             for item in backup_dir.iterdir():
                 if item.is_file():
                     shutil.copy2(item, run_dir)
@@ -848,24 +647,13 @@ class TrainingTracker:
         run_id: str,
         output_dir: Union[str, Path]
     ) -> bool:
-        """
-        Export a run to MLflow-compatible format.
-        
-        Args:
-            run_id: Run ID
-            output_dir: Directory for MLflow-compatible output
-            
-        Returns:
-            bool: True if export was successful
-        """
-        # Get run info
+
         try:
             run_info = self.get_run_info(run_id)
         except ValueError as e:
             self.logger.error(f"Error getting run info: {str(e)}")
             return False
         
-        # Create MLflow directory structure
         mlflow_run_dir = ensure_dir(Path(output_dir) / run_id)
         mlflow_params_dir = ensure_dir(mlflow_run_dir / "params")
         mlflow_metrics_dir = ensure_dir(mlflow_run_dir / "metrics")
@@ -932,17 +720,7 @@ class TrainingTracker:
             return False
     
     def _yaml_format(self, data: Dict[str, Any]) -> str:
-        """
-        Format dictionary as YAML string.
-        
-        This is a simple implementation for meta.yaml export.
-        
-        Args:
-            data: Dictionary to format
-            
-        Returns:
-            str: YAML-formatted string
-        """
+
         lines = []
         
         for key, value in data.items():
@@ -956,28 +734,20 @@ class TrainingTracker:
         return "\n".join(lines)
     
     def close(self) -> None:
-        """
-        Close the training tracker and clean up resources.
-        
-        This method ensures all runs are properly ended before closing.
-        """
-        # End active run if there is one
+
         if self.active_run_id:
             self.logger.info(f"Auto-ending active run during close: {self.active_run_id}")
             self.end_run(status=STATUS_COMPLETED)  # Assume completed
         
-        # End any runs in the stack (should not happen, but just in case)
         while self.run_stack:
             run_id = self.run_stack.pop()
             self.logger.warning(f"Auto-ending stacked run during close: {run_id}")
             self.end_run(run_id=run_id, status=STATUS_COMPLETED)
         
-        # Ensure active_run_id is None after all runs are ended
         if self.active_run_id:
             self.logger.info(f"Auto-ending remaining active run during close: {self.active_run_id}")
             self.end_run(status=STATUS_COMPLETED)
         
-        # Ensure active_run_id is explicitly set to None (in case end_run didn't do it)
         self.active_run_id = None
         
         self.logger.info("Closed training tracker")

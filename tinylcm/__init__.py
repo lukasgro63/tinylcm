@@ -1,3 +1,4 @@
+# tinylcm/__init__.py
 """
 TinyLCM - Lightweight lifecycle management for ML models on edge devices.
 
@@ -15,7 +16,7 @@ from tinylcm.core.data_logger import DataLogger
 from tinylcm.core.training_tracker import TrainingTracker
 from tinylcm.core.inference_monitor import InferenceMonitor
 from tinylcm.core.drift_detector import DriftDetector
-from tinylcm.core.sync_interface import SyncInterface, SyncPackage
+from tinylcm.client.sync_interface import SyncInterface, SyncPackage  # Aktualisierter Import
 
 __all__ = [
     # Version info
