@@ -1,8 +1,4 @@
-"""Training tracking and experiment management for TinyLCM.
-
-Provides functionality for tracking training runs, logging parameters,
-metrics and artifacts in a lightweight, MLflow-compatible format.
-"""
+"""Core implementation of the TrainingTracker."""
 
 import json
 import os
@@ -853,11 +849,11 @@ class TrainingTracker:
         output_dir: Union[str, Path]
     ) -> bool:
         """
-        Export a run to MLflow format.
+        Export a run to MLflow-compatible format.
         
         Args:
             run_id: Run ID
-            output_dir: Directory for MLflow output
+            output_dir: Directory for MLflow-compatible output
             
         Returns:
             bool: True if export was successful
@@ -887,7 +883,7 @@ class TrainingTracker:
             }
             
             with open(mlflow_run_dir / "meta.yaml", "w") as f:
-                f.write(yaml_format(meta))
+                f.write(self._yaml_format(meta))
             
             # Export parameters
             params = run_info.get("params", {})
@@ -905,7 +901,8 @@ class TrainingTracker:
                     step = metric_entry.get("step", i)
                     value = metric_entry.get("value", 0)
                     
-                    metric_filename = f"{metric_name}-{timestamp:.0f}"
+                    # Verwenden Sie den Index, um eindeutige Dateinamen zu garantieren
+                    metric_filename = f"{metric_name}-{timestamp:.0f}-{i}"
                     with open(mlflow_metrics_dir / metric_filename, "w") as f:
                         f.write(f"{value} {step} {timestamp:.0f}")
             
@@ -927,12 +924,36 @@ class TrainingTracker:
                 elif src_path_obj.is_dir():
                     shutil.copytree(src_path_obj, dest_path, dirs_exist_ok=True)
             
-            self.logger.info(f"Exported run {run_id} to MLflow format at {output_dir}")
+            self.logger.info(f"Exported run {run_id} to MLflow-compatible format at {output_dir}")
             return True
             
         except Exception as e:
-            self.logger.error(f"Error exporting run {run_id} to MLflow format: {str(e)}")
+            self.logger.error(f"Error exporting run {run_id} to MLflow-compatible format: {str(e)}")
             return False
+    
+    def _yaml_format(self, data: Dict[str, Any]) -> str:
+        """
+        Format dictionary as YAML string.
+        
+        This is a simple implementation for meta.yaml export.
+        
+        Args:
+            data: Dictionary to format
+            
+        Returns:
+            str: YAML-formatted string
+        """
+        lines = []
+        
+        for key, value in data.items():
+            if isinstance(value, dict):
+                lines.append(f"{key}:")
+                for sub_key, sub_value in value.items():
+                    lines.append(f"  {sub_key}: {sub_value}")
+            else:
+                lines.append(f"{key}: {value}")
+        
+        return "\n".join(lines)
     
     def close(self) -> None:
         """
@@ -952,29 +973,3 @@ class TrainingTracker:
             self.end_run(run_id=run_id, status=STATUS_COMPLETED)
         
         self.logger.info("Closed training tracker")
-
-
-def yaml_format(data: Dict[str, Any]) -> str:
-    """
-    Format dictionary as YAML string.
-    
-    This is a simple implementation for meta.yaml export.
-    For a full implementation, consider using PyYAML.
-    
-    Args:
-        data: Dictionary to format
-        
-    Returns:
-        str: YAML-formatted string
-    """
-    lines = []
-    
-    for key, value in data.items():
-        if isinstance(value, dict):
-            lines.append(f"{key}:")
-            for sub_key, sub_value in value.items():
-                lines.append(f"  {sub_key}: {sub_value}")
-        else:
-            lines.append(f"{key}: {value}")
-    
-    return "\n".join(lines)
