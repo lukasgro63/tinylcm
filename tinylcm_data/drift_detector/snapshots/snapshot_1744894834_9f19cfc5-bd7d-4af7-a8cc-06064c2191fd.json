@@ -1,0 +1,28 @@
+{
+  "current_window": [
+    {
+      "confidence": 0.6,
+      "prediction": "B"
+    },
+    {
+      "confidence": 0.6,
+      "prediction": "B"
+    },
+    {
+      "confidence": 0.6,
+      "prediction": "B"
+    },
+    {
+      "confidence": 0.6,
+      "prediction": "B"
+    },
+    {
+      "confidence": 0.6,
+      "prediction": "B"
+    }
+  ],
+  "session_id": "9f19cfc5-bd7d-4af7-a8cc-06064c2191fd",
+  "threshold": 0.2,
+  "timestamp": 1744894834,
+  "window_size": 8
+}

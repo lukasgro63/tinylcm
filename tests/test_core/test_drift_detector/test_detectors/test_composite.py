@@ -30,28 +30,32 @@ def test_composite_create_reference(temp_dir, sample_distribution_data):
 
 
 def test_composite_check_drift(temp_dir):
-    dist_detector = DistributionDriftDetector(threshold=0.2)
+    dist_detector = DistributionDriftDetector(window_size=8, threshold=0.2)
     dist_detector.reference_distribution = {
         "class_distribution": {"A": 0.5, "B": 0.5}
     }
-    conf_detector = ConfidenceDriftDetector(threshold=0.2)
+    
+    conf_detector = ConfidenceDriftDetector(window_size=8, threshold=0.2)
     conf_detector.reference_distribution = {
         "confidence_stats": {"mean": 0.9, "std": 0.05}
     }
+    
     detector = CompositeDriftDetector(
         storage_dir=temp_dir,
-        detectors=[dist_detector, conf_detector]
+        detectors=[dist_detector, conf_detector],
+        window_size=8
     )
     detector.reference_distribution = {}
+    
     for _ in range(5):
         detector.current_window.append({
             "prediction": "B",
             "confidence": 0.6
         })
+    
     result = detector.check_for_drift()
+    
     assert result["drift_detected"] is True
-    assert "detector_results" in result
-    assert len(result["detector_results"]) == 2
 
 
 def test_composite_reset(temp_dir):

@@ -1,0 +1,11 @@
+{
+  "distribution": {},
+  "metadata": {
+    "created_at": 1744894900.5176766,
+    "sample_count": 13,
+    "session_id": "d57f6973-8d01-43e6-a48d-a62155ec0240",
+    "threshold": 0.1,
+    "timestamp": 1744894900.5176764,
+    "window_size": 100
+  }
+}
