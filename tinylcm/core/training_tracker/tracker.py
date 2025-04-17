@@ -972,4 +972,12 @@ class TrainingTracker:
             self.logger.warning(f"Auto-ending stacked run during close: {run_id}")
             self.end_run(run_id=run_id, status=STATUS_COMPLETED)
         
+        # Ensure active_run_id is None after all runs are ended
+        if self.active_run_id:
+            self.logger.info(f"Auto-ending remaining active run during close: {self.active_run_id}")
+            self.end_run(status=STATUS_COMPLETED)
+        
+        # Ensure active_run_id is explicitly set to None (in case end_run didn't do it)
+        self.active_run_id = None
+        
         self.logger.info("Closed training tracker")
