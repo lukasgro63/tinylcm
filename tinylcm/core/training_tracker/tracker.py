@@ -1,5 +1,3 @@
-"""Core implementation of the TrainingTracker."""
-
 import json
 import os
 import shutil
@@ -33,19 +31,15 @@ class TrainingTracker:
         self.config = config or get_config()
         component_config = self.config.get_component_config("training_tracker")
         
-        # Set up logger
         self.logger = setup_logger(f"{__name__}.{self.__class__.__name__}")
         
-        # Storage settings
         self.storage_dir = Path(storage_dir or component_config.get("storage_dir", DEFAULT_TRAINING_DIR))
         self.runs_dir = ensure_dir(self.storage_dir / "runs")
         self.artifacts_dir = ensure_dir(self.storage_dir / "artifacts")
         self.backups_dir = ensure_dir(self.storage_dir / "backups")
         
-        # Configuration
         self.log_artifacts = component_config.get("log_artifacts", True)
         
-        # State
         self.active_run_id = None
         self.run_stack = []  # For nested runs
         
@@ -66,31 +60,25 @@ class TrainingTracker:
                 filter_func=lambda run: run.get("run_name") == run_name and run.get("status") != STATUS_RUNNING
             )
             if existing_runs:
-                # Resume the most recent run
                 existing_runs.sort(key=lambda run: run.get("end_time", 0), reverse=True)
                 run_id = existing_runs[0]["run_id"]
                 self.logger.info(f"Resuming existing run: {run_id}")
         
-        # Handle nested runs
         parent_run_id = None
         if nested:
             if not self.active_run_id:
                 raise ValueError("Cannot start a nested run with no active parent run")
             parent_run_id = self.active_run_id
-            # Save current run to the stack
             self.run_stack.append(self.active_run_id)
         elif self.active_run_id:
             self.logger.warning(f"Starting a new run without ending the previous run: {self.active_run_id}")
             self.end_run()  # Auto-end previous run
         
-        # Generate or use provided run ID
         if run_id is None:
             run_id = str(uuid.uuid4())
         
-        # Create run directory
         run_dir = ensure_dir(self.runs_dir / run_id)
         
-        # Create run metadata
         metadata = {
             "run_id": run_id,
             "run_name": run_name,
@@ -101,11 +89,9 @@ class TrainingTracker:
             "parent_run_id": parent_run_id
         }
         
-        # Save metadata
         metadata_path = run_dir / "metadata.json"
         save_json(metadata, metadata_path)
         
-        # Set as active run
         self.active_run_id = run_id
         
         self.logger.info(f"Started run '{run_name}' with ID: {run_id}")
@@ -122,13 +108,11 @@ class TrainingTracker:
             if run_id is None:
                 raise ValueError("No active run to end")
         
-        # Get run directory
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             self.logger.warning(f"Run directory not found: {run_dir}")
             return False
         
-        # Update metadata
         metadata_path = run_dir / "metadata.json"
         if not metadata_path.exists():
             self.logger.warning(f"Run metadata not found: {metadata_path}")
@@ -141,7 +125,6 @@ class TrainingTracker:
             save_json(metadata, metadata_path)
             
             if run_id == self.active_run_id:
-                # If we have a run stack, pop and restore the parent
                 if self.run_stack:
                     self.active_run_id = self.run_stack.pop()
                     self.logger.info(f"Restored parent run: {self.active_run_id}")
@@ -165,19 +148,16 @@ class TrainingTracker:
         if not key:
             raise ValueError("Parameter key cannot be empty")
         
-        # Determine which run to use
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
                 raise ValueError("No active run for logging parameters")
         
-        # Get run directory
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             self.logger.warning(f"Run directory not found: {run_dir}")
             return False
         
-        # Load existing params or create new
         params_path = run_dir / "params.json"
         if params_path.exists():
             try:
@@ -187,10 +167,8 @@ class TrainingTracker:
         else:
             params = {}
         
-        # Add or update parameter
         params[key] = value
         
-        # Save params
         try:
             save_json(params, params_path)
             self.logger.debug(f"Logged parameter '{key}' for run {run_id}")
@@ -206,21 +184,18 @@ class TrainingTracker:
     ) -> bool:
 
         if not params_dict:
-            return True  # Nothing to log
+            return True
         
-        # Determine which run to use
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
                 raise ValueError("No active run for logging parameters")
         
-        # Get run directory
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             self.logger.warning(f"Run directory not found: {run_dir}")
             return False
         
-        # Load existing params or create new
         params_path = run_dir / "params.json"
         if params_path.exists():
             try:
@@ -230,10 +205,8 @@ class TrainingTracker:
         else:
             existing_params = {}
         
-        # Update parameters
         existing_params.update(params_dict)
         
-        # Save params
         try:
             save_json(existing_params, params_path)
             self.logger.debug(f"Logged {len(params_dict)} parameters for run {run_id}")
@@ -253,19 +226,16 @@ class TrainingTracker:
         if not key:
             raise ValueError("Metric key cannot be empty")
         
-        # Determine which run to use
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
                 raise ValueError("No active run for logging metrics")
         
-        # Get run directory
         run_dir = self.runs_dir / run_id
         if not run_dir.exists():
             self.logger.warning(f"Run directory not found: {run_dir}")
             return False
         
-        # Load existing metrics or create new
         metrics_path = run_dir / "metrics.json"
         if metrics_path.exists():
             try:
@@ -275,7 +245,6 @@ class TrainingTracker:
         else:
             metrics = {}
         
-        # Create metric entry
         metric_entry = {
             "value": value,
             "timestamp": time.time()
@@ -283,12 +252,10 @@ class TrainingTracker:
         if step is not None:
             metric_entry["step"] = step
         
-        # Add to metrics record
         if key not in metrics:
             metrics[key] = []
         metrics[key].append(metric_entry)
         
-        # Save metrics
         try:
             save_json(metrics, metrics_path)
             self.logger.debug(f"Logged metric '{key}' with value {value} for run {run_id}")
@@ -307,7 +274,6 @@ class TrainingTracker:
         if not metrics_dict:
             return True  # Nothing to log
         
-        # Log each metric individually
         success = True
         for key, value in metrics_dict.items():
             result = self.log_metric(key, value, step=step, run_id=run_id)
@@ -328,27 +294,21 @@ class TrainingTracker:
             if run_id is None:
                 raise ValueError("No active run for logging artifacts")
         
-        # Then check if file exists
         path_obj = Path(local_path)
         if not path_obj.exists():
             raise FileNotFoundError(f"Artifact file not found: {local_path}")
         
-        # Determine artifact destination path
         if artifact_path is None:
             artifact_path = path_obj.name
         
-        # Create artifact directory for this run
         run_artifacts_dir = ensure_dir(self.artifacts_dir / run_id)
         
-        # Create destination path
         dest_path = run_artifacts_dir / artifact_path
         ensure_dir(dest_path.parent)
         
-        # Copy the artifact
         try:
             shutil.copy2(path_obj, dest_path)
             
-            # Update artifacts list
             self._update_artifacts_list(
                 run_id=run_id,
                 artifact_name=artifact_path,
@@ -412,22 +372,18 @@ class TrainingTracker:
         if not path_obj.exists():
             raise FileNotFoundError(f"Model file not found: {model_path}")
         
-        # Determine which run to use
         if run_id is None:
             run_id = self.active_run_id
             if run_id is None:
                 raise ValueError("No active run for logging models")
         
-        # Create model directory for this run
         run_models_dir = ensure_dir(self.artifacts_dir / run_id / "models")
         model_dir = ensure_dir(run_models_dir / path_obj.stem)
         
-        # Copy the model file
         dest_path = model_dir / path_obj.name
         try:
             shutil.copy2(path_obj, dest_path)
             
-            # Create model metadata
             model_meta = {
                 "format": model_format,
                 "flavor": flavor,
@@ -437,11 +393,9 @@ class TrainingTracker:
                 "custom_properties": custom_properties or {}
             }
             
-            # Save model metadata
             meta_path = model_dir / "model_info.json"
             save_json(model_meta, meta_path)
             
-            # Update artifacts list
             self._update_artifacts_list(
                 run_id=run_id,
                 artifact_name=path_obj.name,
@@ -467,7 +421,6 @@ class TrainingTracker:
 
         run_dir = self.runs_dir / run_id
         
-        # Load existing artifacts list or create new
         artifacts_path = run_dir / "artifacts.json"
         if artifacts_path.exists():
             try:
@@ -477,7 +430,6 @@ class TrainingTracker:
         else:
             artifacts = []
         
-        # Create artifact entry
         artifact_entry = {
             "name": artifact_name,
             "path": artifact_path,
@@ -488,7 +440,6 @@ class TrainingTracker:
         if description:
             artifact_entry["description"] = description
         
-        # Add to artifacts list
         artifacts.append(artifact_entry)
         
         save_json(artifacts, artifacts_path)
@@ -499,14 +450,12 @@ class TrainingTracker:
         if not run_dir.exists():
             raise ValueError(f"Run not found: {run_id}")
         
-        # Load metadata
         metadata_path = run_dir / "metadata.json"
         if not metadata_path.exists():
             raise ValueError(f"Run metadata not found: {run_id}")
         
         metadata = load_json(metadata_path)
         
-        # Load parameters if available
         params_path = run_dir / "params.json"
         if params_path.exists():
             try:
@@ -517,7 +466,6 @@ class TrainingTracker:
         else:
             metadata["params"] = {}
         
-        # Load metrics if available
         metrics_path = run_dir / "metrics.json"
         if metrics_path.exists():
             try:
@@ -528,7 +476,6 @@ class TrainingTracker:
         else:
             metadata["metrics"] = {}
         
-        # Load artifacts if available
         artifacts_path = run_dir / "artifacts.json"
         if artifacts_path.exists():
             try:
@@ -548,12 +495,10 @@ class TrainingTracker:
 
         runs = []
         
-        # Iterate through run directories
         for run_dir in self.runs_dir.iterdir():
             if not run_dir.is_dir():
                 continue
             
-            # Load metadata
             metadata_path = run_dir / "metadata.json"
             if not metadata_path.exists():
                 continue
@@ -561,7 +506,6 @@ class TrainingTracker:
             try:
                 metadata = load_json(metadata_path)
                 
-                # Apply filter if provided
                 if filter_func is None or filter_func(metadata):
                     runs.append(metadata)
             except Exception as e:
@@ -575,11 +519,9 @@ class TrainingTracker:
         if not run_dir.exists():
             return False
         
-        # Delete run directory
         try:
             shutil.rmtree(run_dir)
             
-            # Also delete artifacts if they exist
             run_artifacts_dir = self.artifacts_dir / run_id
             if run_artifacts_dir.exists():
                 shutil.rmtree(run_artifacts_dir)
@@ -597,16 +539,13 @@ class TrainingTracker:
             self.logger.warning(f"Run not found for backup: {run_id}")
             return False
         
-        # Create backup directory
         backup_dir = ensure_dir(self.backups_dir / run_id)
         
         try:
-            # Copy run directory contents
             for item in run_dir.iterdir():
                 if item.is_file():
                     shutil.copy2(item, backup_dir)
             
-            # Copy artifacts if they exist
             run_artifacts_dir = self.artifacts_dir / run_id
             if run_artifacts_dir.exists():
                 backup_artifacts_dir = ensure_dir(backup_dir / "artifacts")
@@ -626,14 +565,12 @@ class TrainingTracker:
             return False
         
         try:
-            # Create run directory
             run_dir = ensure_dir(self.runs_dir / run_id)
             
             for item in backup_dir.iterdir():
                 if item.is_file():
                     shutil.copy2(item, run_dir)
                 elif item.name == "artifacts":
-                    # Restore artifacts
                     shutil.copytree(item, self.artifacts_dir / run_id, dirs_exist_ok=True)
             
             self.logger.info(f"Restored run {run_id} from backup")
@@ -673,28 +610,22 @@ class TrainingTracker:
             with open(mlflow_run_dir / "meta.yaml", "w") as f:
                 f.write(self._yaml_format(meta))
             
-            # Export parameters
             params = run_info.get("params", {})
             for param_name, param_value in params.items():
-                # MLflow stores parameters as separate files with the value as content
                 with open(mlflow_params_dir / param_name, "w") as f:
                     f.write(str(param_value))
             
-            # Export metrics
             metrics = run_info.get("metrics", {})
             for metric_name, metric_values in metrics.items():
                 for i, metric_entry in enumerate(metric_values):
-                    # MLflow stores metrics as separate files with step and timestamp
                     timestamp = metric_entry.get("timestamp", 0)
                     step = metric_entry.get("step", i)
                     value = metric_entry.get("value", 0)
                     
-                    # Verwenden Sie den Index, um eindeutige Dateinamen zu garantieren
                     metric_filename = f"{metric_name}-{timestamp:.0f}-{i}"
                     with open(mlflow_metrics_dir / metric_filename, "w") as f:
                         f.write(f"{value} {step} {timestamp:.0f}")
             
-            # Export artifacts
             artifacts = run_info.get("artifacts", [])
             for artifact in artifacts:
                 src_path = artifact.get("path")
@@ -704,7 +635,6 @@ class TrainingTracker:
                 name = artifact.get("name", "")
                 dest_path = mlflow_artifacts_dir / name
                 
-                # Copy the artifact
                 src_path_obj = Path(src_path)
                 if src_path_obj.is_file():
                     ensure_dir(dest_path.parent)

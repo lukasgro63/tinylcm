@@ -1,20 +1,10 @@
-"""Composite anomaly detection combining multiple detectors."""
-
 from typing import Any, Dict, List, Tuple
 
 from tinylcm.core.inference_monitor.anomaly_detectors.base import AnomalyDetector
 from tinylcm.utils.logging import setup_logger
 
 class CompositeAnomalyDetector(AnomalyDetector):
-    """Composite anomaly detector that combines multiple detectors."""
-
     def __init__(self, detectors: List[AnomalyDetector]):
-        """
-        Initialize with list of detectors.
-
-        Args:
-            detectors: List of anomaly detectors
-        """
         self.detectors = detectors
         self.logger = setup_logger(f"{__name__}.{self.__class__.__name__}")
 
@@ -23,16 +13,7 @@ class CompositeAnomalyDetector(AnomalyDetector):
         record: Dict[str, Any],
         context: Dict[str, Any]
     ) -> Tuple[bool, List[str]]:
-        """
-        Check using all contained detectors.
 
-        Args:
-            record: The inference record to check
-            context: Additional context information
-
-        Returns:
-            (is_anomaly, reasons): Combined anomaly status and reasons
-        """
         is_anomaly = False
         all_reasons = []
 

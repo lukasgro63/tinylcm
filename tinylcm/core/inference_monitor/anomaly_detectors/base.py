@@ -1,5 +1,3 @@
-"""Base classes for anomaly detection."""
-
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Tuple
 
@@ -9,7 +7,6 @@ from tinylcm.utils.logging import setup_logger
 logger = setup_logger(__name__)
 
 class AnomalyDetector(IAnomalyDetector):
-    """Base class for anomaly detection strategies."""
 
     @abstractmethod
     def check_for_anomalies(
