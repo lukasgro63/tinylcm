@@ -95,7 +95,7 @@ class ConnectionManager:
         self.last_connection_time = None
         self.failed_attempts = 0
         self._notify_status_change("disconnected")
-    
+        
     def execute_request(self, method: str, endpoint: str, auto_connect: bool = True, retry_on_failure: bool = True, **kwargs) -> requests.Response:
         if auto_connect and not self.is_connected():
             if retry_on_failure:
@@ -104,6 +104,10 @@ class ConnectionManager:
                 self.connect()
         if endpoint.startswith('/'):
             endpoint = endpoint[1:]
+        
+        if not endpoint.startswith('api/'):
+            endpoint = f"api/{endpoint}"
+        
         url = f"{self.server_url}/{endpoint}"
         request_headers = self.headers.copy()
         if 'headers' in kwargs:
