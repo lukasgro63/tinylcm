@@ -128,7 +128,10 @@ class SyncClient:
             self.logger.debug(f"Found package file: {package_file}")
             file_hash = calculate_file_hash(package_file)
             
-            # Prepare metadata and data
+            # Don't use ConnectionManager for file uploads - direct requests approach
+            url = f"{self.server_url}/api/packages/upload"
+            
+            # Prepare metadata
             metadata = {
                 'device_id': self.device_id,
                 'package_id': package_id,
@@ -140,39 +143,20 @@ class SyncClient:
             # Convert metadata to JSON string
             metadata_str = json.dumps(metadata)
             
-            # BYPASS CONNECTION MANAGER - Make a direct request instead
             try:
-                self.logger.info(f"Sending package using direct requests library")
-                
-                url = f"{self.server_url}/api/packages/upload"
-                
-                # Open the file here
+                # Open the file for upload
                 with open(package_file, 'rb') as file_obj:
-                    # Create files dictionary
-                    files = {
-                        'package': (package_file.name, file_obj, 'application/octet-stream')
-                    }
-                    
-                    # Create data dictionary with JSON-encoded metadata
-                    data = {
-                        'metadata': metadata_str
-                    }
+                    # Create the multipart form data
+                    files = {'package': (package_file.name, file_obj, 'application/octet-stream')}
+                    data = {'metadata': metadata_str}
                     
                     # Log what we're sending
-                    self.logger.info(f"URL: {url}")
-                    self.logger.info(f"Files: {list(files.keys())}")
-                    self.logger.info(f"Metadata: {metadata_str}")
+                    self.logger.debug(f"Uploading to URL: {url}")
+                    self.logger.debug(f"Files: {list(files.keys())}")
+                    self.logger.debug(f"Metadata: {metadata_str}")
                     
-                    # Set headers
-                    headers = self.headers.copy()
-                    
-                    # Make the request
-                    response = requests.post(
-                        url=url,
-                        files=files,
-                        data=data,
-                        headers=headers
-                    )
+                    # Send the request directly
+                    response = requests.post(url=url, files=files, data=data, headers=self.headers)
                     
                     if response.status_code == 200:
                         self.logger.info(f"Successfully sent package {package_id}")
@@ -193,7 +177,7 @@ class SyncClient:
                             status="error"
                         )
                         raise ConnectionError(error_msg)
-            except Exception as e:
+            except requests.RequestException as e:
                 error_msg = f"Package upload request failed: {str(e)}"
                 self.logger.error(error_msg)
                 raise ConnectionError(error_msg)
