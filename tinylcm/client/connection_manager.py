@@ -105,10 +105,10 @@ class ConnectionManager:
         if endpoint.startswith('/'):
             endpoint = endpoint[1:]
         
-        # TINYSPHERE-PATCH: Add /api/ prefix if not present
+        # Only add api/ if not already present
         if not endpoint.startswith('api/'):
             endpoint = f"api/{endpoint}"
-            
+                
         url = f"{self.server_url}/{endpoint}"
         request_headers = self.headers.copy()
         if 'headers' in kwargs:
@@ -121,17 +121,16 @@ class ConnectionManager:
         if 'files' in kwargs:
             self.logger.debug(f"Request includes files: {list(kwargs['files'].keys())}")
         if 'data' in kwargs:
-            self.logger.debug(f"Request includes data: {list(kwargs['data'].keys())}")
+            self.logger.debug(f"Request includes data parameters: {list(kwargs['data'].keys())}")
         
         try:
             method = method.upper()
             if method == 'GET':
                 response = requests.get(url, headers=request_headers, **kwargs)
             elif method == 'POST':
-                # IMPORTANT: Pass files and data directly to ensure they are properly handled
-                files = kwargs.pop('files', None)
-                data = kwargs.pop('data', None)
-                response = requests.post(url, headers=request_headers, files=files, data=data, **kwargs)
+                # IMPORTANT: Get files and data directly from kwargs without popping them
+                # This ensures they are passed correctly to requests.post
+                response = requests.post(url, headers=request_headers, **kwargs)
             elif method == 'PUT':
                 response = requests.put(url, headers=request_headers, **kwargs)
             elif method == 'DELETE':

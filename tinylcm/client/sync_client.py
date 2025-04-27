@@ -10,7 +10,7 @@ import requests
 
 from tinylcm.client.connection_manager import ConnectionManager
 from tinylcm.client.sync_interface import SyncInterface
-from tinylcm.utils.errors import SyncError, ConnectionError
+from tinylcm.utils.errors import ConnectionError, SyncError
 from tinylcm.utils.logging import setup_logger
 from tinylcm.utils.versioning import calculate_file_hash
 
@@ -127,34 +127,60 @@ class SyncClient:
             package_file = package_files[0]
             self.logger.debug(f"Found package file: {package_file}")
             file_hash = calculate_file_hash(package_file)
-            files = {
-                'package': (package_file.name, open(package_file, 'rb'), 'application/octet-stream')
-            }
-            data = {
+            
+            # Construct the metadata
+            metadata = {
                 'device_id': self.device_id,
                 'package_id': package_id,
                 'package_type': package_meta.get('package_type', 'unknown'),
                 'hash': file_hash,
                 'timestamp': time.time()
             }
-            try:
-                response = self.connection_manager.execute_request(method="POST", endpoint="packages/upload", files=files, data={'metadata': json.dumps(data)})
-                if response.status_code == 200:
-                    self.logger.info(f"Successfully sent package {package_id}")
-                    self.sync_interface.mark_as_synced(package_id=package_id, sync_time=time.time(), server_id=response.json().get('server_id', 'unknown'), status="success")
-                    return True
-                else:
-                    error_msg = f"Package upload failed: {response.status_code} - {response.text}"
+            
+            # Open the file and construct the files dict
+            with open(package_file, 'rb') as f:
+                files = {
+                    'package': (package_file.name, f, 'application/octet-stream')
+                }
+                
+                # Important: Convert metadata to JSON string
+                data = {'metadata': json.dumps(metadata)}
+                
+                # Debug output
+                self.logger.debug(f"Sending package with metadata: {metadata}")
+                self.logger.debug(f"File name: {package_file.name}, size: {os.path.getsize(package_file)}")
+                
+                try:
+                    response = self.connection_manager.execute_request(
+                        method="POST", 
+                        endpoint="packages/upload", 
+                        files=files, 
+                        data=data
+                    )
+                    
+                    if response.status_code == 200:
+                        self.logger.info(f"Successfully sent package {package_id}")
+                        self.sync_interface.mark_as_synced(
+                            package_id=package_id, 
+                            sync_time=time.time(), 
+                            server_id=response.json().get('server_id', 'unknown'), 
+                            status="success"
+                        )
+                        return True
+                    else:
+                        error_msg = f"Package upload failed: {response.status_code} - {response.text}"
+                        self.logger.error(error_msg)
+                        self.sync_interface.mark_as_synced(
+                            package_id=package_id, 
+                            sync_time=time.time(), 
+                            server_id="none", 
+                            status="error"
+                        )
+                        raise ConnectionError(error_msg)
+                except requests.RequestException as e:
+                    error_msg = f"Package upload request failed: {str(e)}"
                     self.logger.error(error_msg)
-                    self.sync_interface.mark_as_synced(package_id=package_id, sync_time=time.time(), server_id="none", status="error")
                     raise ConnectionError(error_msg)
-            except requests.RequestException as e:
-                error_msg = f"Package upload request failed: {str(e)}"
-                self.logger.error(error_msg)
-                raise ConnectionError(error_msg)
-            finally:
-                if 'files' in locals() and 'package' in files:
-                    files['package'][1].close()
         except SyncError as e:
             self.logger.error(f"Error preparing package {package_id}: {str(e)}")
             raise
