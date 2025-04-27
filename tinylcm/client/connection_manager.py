@@ -109,6 +109,15 @@ class ConnectionManager:
             endpoint = f"api/{endpoint}"
         
         url = f"{self.server_url}/{endpoint}"
+
+        # DEBUG: Ausgabe der Request-Parameter
+        if 'files' in kwargs:
+            self.logger.debug(f"Request with files to {url}")
+            file_names = [k for k in kwargs['files'].keys()]
+            self.logger.debug(f"File keys: {file_names}")
+        if 'data' in kwargs:
+            self.logger.debug(f"Request data keys: {kwargs['data'].keys()}")
+
         request_headers = self.headers.copy()
         if 'headers' in kwargs:
             request_headers.update(kwargs.pop('headers'))
