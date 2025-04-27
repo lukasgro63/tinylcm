@@ -42,7 +42,7 @@ class ConnectionManager:
     def connect(self) -> bool:
         self.logger.debug(f"Attempting to connect to server: {self.server_url}")
         try:
-            response = requests.get(f"{self.server_url}/status", headers=self.headers, timeout=self.request_timeout)
+            response = requests.get(f"{self.server_url}/api/status", headers=self.headers, timeout=self.request_timeout)
             if response.status_code == 200:
                 self.logger.info(f"Successfully connected to server: {self.server_url}")
                 self.last_connection_time = time.time()
