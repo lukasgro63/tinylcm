@@ -128,7 +128,7 @@ class SyncClient:
             self.logger.debug(f"Found package file: {package_file}")
             file_hash = calculate_file_hash(package_file)
             
-            # Construct the metadata
+            # Prepare metadata and data
             metadata = {
                 'device_id': self.device_id,
                 'package_id': package_id,
@@ -137,33 +137,49 @@ class SyncClient:
                 'timestamp': time.time()
             }
             
-            # Open the file and construct the files dict
-            with open(package_file, 'rb') as f:
-                files = {
-                    'package': (package_file.name, f, 'application/octet-stream')
-                }
+            # Convert metadata to JSON string
+            metadata_str = json.dumps(metadata)
+            
+            # BYPASS CONNECTION MANAGER - Make a direct request instead
+            try:
+                self.logger.info(f"Sending package using direct requests library")
                 
-                # Important: Convert metadata to JSON string
-                data = {'metadata': json.dumps(metadata)}
+                url = f"{self.server_url}/api/packages/upload"
                 
-                # Debug output
-                self.logger.debug(f"Sending package with metadata: {metadata}")
-                self.logger.debug(f"File name: {package_file.name}, size: {os.path.getsize(package_file)}")
-                
-                try:
-                    response = self.connection_manager.execute_request(
-                        method="POST", 
-                        endpoint="packages/upload", 
-                        files=files, 
-                        data=data
+                # Open the file here
+                with open(package_file, 'rb') as file_obj:
+                    # Create files dictionary
+                    files = {
+                        'package': (package_file.name, file_obj, 'application/octet-stream')
+                    }
+                    
+                    # Create data dictionary with JSON-encoded metadata
+                    data = {
+                        'metadata': metadata_str
+                    }
+                    
+                    # Log what we're sending
+                    self.logger.info(f"URL: {url}")
+                    self.logger.info(f"Files: {list(files.keys())}")
+                    self.logger.info(f"Metadata: {metadata_str}")
+                    
+                    # Set headers
+                    headers = self.headers.copy()
+                    
+                    # Make the request
+                    response = requests.post(
+                        url=url,
+                        files=files,
+                        data=data,
+                        headers=headers
                     )
                     
                     if response.status_code == 200:
                         self.logger.info(f"Successfully sent package {package_id}")
                         self.sync_interface.mark_as_synced(
-                            package_id=package_id, 
-                            sync_time=time.time(), 
-                            server_id=response.json().get('server_id', 'unknown'), 
+                            package_id=package_id,
+                            sync_time=time.time(),
+                            server_id=response.json().get('server_id', 'unknown'),
                             status="success"
                         )
                         return True
@@ -171,16 +187,16 @@ class SyncClient:
                         error_msg = f"Package upload failed: {response.status_code} - {response.text}"
                         self.logger.error(error_msg)
                         self.sync_interface.mark_as_synced(
-                            package_id=package_id, 
-                            sync_time=time.time(), 
+                            package_id=package_id,
+                            sync_time=time.time(),
                             server_id="none", 
                             status="error"
                         )
                         raise ConnectionError(error_msg)
-                except requests.RequestException as e:
-                    error_msg = f"Package upload request failed: {str(e)}"
-                    self.logger.error(error_msg)
-                    raise ConnectionError(error_msg)
+            except Exception as e:
+                error_msg = f"Package upload request failed: {str(e)}"
+                self.logger.error(error_msg)
+                raise ConnectionError(error_msg)
         except SyncError as e:
             self.logger.error(f"Error preparing package {package_id}: {str(e)}")
             raise
