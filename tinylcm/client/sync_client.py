@@ -115,14 +115,18 @@ class SyncClient:
     def send_package(self, package_id: str) -> bool:
         self.logger.info(f"Preparing to send package: {package_id}")
         try:
+            # Find the package
             packages = self.sync_interface.list_packages(filter_func=lambda p: p["package_id"] == package_id)
             if not packages:
                 raise SyncError(f"Package not found: {package_id}")
+            
             package_meta = packages[0]
             package_dir = Path(self.sync_interface.packages_dir)
             package_files = list(package_dir.glob(f"{package_id}_*.tar.gz")) + list(package_dir.glob(f"{package_id}_*.zip")) + list(package_dir.glob(f"{package_id}_*.tar"))
+            
             if not package_files:
                 raise SyncError(f"Package file not found for ID: {package_id}")
+            
             package_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
             package_file = package_files[0]
             self.logger.debug(f"Found package file: {package_file}")
@@ -143,16 +147,23 @@ class SyncClient:
             try:
                 # Open the file for upload
                 with open(package_file, 'rb') as file_obj:
-                    # Create the multipart form data using ConnectionManager
-                    # The key is using the correct field names and structure
-                    endpoint = "packages/upload"
+                    # FIX: Use direct requests approach instead of ConnectionManager
+                    # for file uploads to avoid Content-Type header issues
                     
-                    # Use ConnectionManager but with files and data explicitly configured for multipart form
-                    response = self.connection_manager.execute_request(
-                        method="POST",
-                        endpoint=endpoint,
+                    # Create copy of headers without Content-Type
+                    upload_headers = self.headers.copy()
+                    if 'Content-Type' in upload_headers:
+                        del upload_headers['Content-Type']
+                    
+                    # Construct the URL manually
+                    url = f"{self.server_url}/api/packages/upload"
+                    
+                    # Send the request directly
+                    response = requests.post(
+                        url=url,
                         files={'package': (package_file.name, file_obj, 'application/octet-stream')},
-                        data={'metadata': metadata_str}
+                        data={'metadata': metadata_str},
+                        headers=upload_headers
                     )
                     
                     if response.status_code == 200:
