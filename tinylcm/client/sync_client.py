@@ -128,9 +128,6 @@ class SyncClient:
             self.logger.debug(f"Found package file: {package_file}")
             file_hash = calculate_file_hash(package_file)
             
-            # Don't use ConnectionManager for file uploads - direct requests approach
-            url = f"{self.server_url}/api/packages/upload"
-            
             # Prepare metadata
             metadata = {
                 'device_id': self.device_id,
@@ -144,19 +141,24 @@ class SyncClient:
             metadata_str = json.dumps(metadata)
             
             try:
-                # Open the file for upload
+                # Open the file for upload - keep this pattern which works well
                 with open(package_file, 'rb') as file_obj:
                     # Create the multipart form data
                     files = {'package': (package_file.name, file_obj, 'application/octet-stream')}
                     data = {'metadata': metadata_str}
                     
                     # Log what we're sending
-                    self.logger.debug(f"Uploading to URL: {url}")
+                    self.logger.debug(f"Uploading package: {package_id}")
                     self.logger.debug(f"Files: {list(files.keys())}")
                     self.logger.debug(f"Metadata: {metadata_str}")
                     
-                    # Send the request directly
-                    response = requests.post(url=url, files=files, data=data, headers=self.headers)
+                    # Use ConnectionManager instead of direct request
+                    response = self.connection_manager.execute_request(
+                        method="POST",
+                        endpoint="packages/upload",
+                        files=files,
+                        data=data
+                    )
                     
                     if response.status_code == 200:
                         self.logger.info(f"Successfully sent package {package_id}")
