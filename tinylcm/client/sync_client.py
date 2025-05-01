@@ -141,23 +141,18 @@ class SyncClient:
             metadata_str = json.dumps(metadata)
             
             try:
-                # Open the file for upload - keep this pattern which works well
+                # Open the file for upload
                 with open(package_file, 'rb') as file_obj:
-                    # Create the multipart form data
-                    files = {'package': (package_file.name, file_obj, 'application/octet-stream')}
-                    data = {'metadata': metadata_str}
+                    # Create the multipart form data using ConnectionManager
+                    # The key is using the correct field names and structure
+                    endpoint = "packages/upload"
                     
-                    # Log what we're sending
-                    self.logger.debug(f"Uploading package: {package_id}")
-                    self.logger.debug(f"Files: {list(files.keys())}")
-                    self.logger.debug(f"Metadata: {metadata_str}")
-                    
-                    # Use ConnectionManager instead of direct request
+                    # Use ConnectionManager but with files and data explicitly configured for multipart form
                     response = self.connection_manager.execute_request(
                         method="POST",
-                        endpoint="packages/upload",
-                        files=files,
-                        data=data
+                        endpoint=endpoint,
+                        files={'package': (package_file.name, file_obj, 'application/octet-stream')},
+                        data={'metadata': metadata_str}
                     )
                     
                     if response.status_code == 200:
@@ -179,7 +174,7 @@ class SyncClient:
                             status="error"
                         )
                         raise ConnectionError(error_msg)
-            except requests.RequestException as e:
+            except Exception as e:
                 error_msg = f"Package upload request failed: {str(e)}"
                 self.logger.error(error_msg)
                 raise ConnectionError(error_msg)
